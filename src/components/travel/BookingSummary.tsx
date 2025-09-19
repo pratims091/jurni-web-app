@@ -2,10 +2,44 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { BookingStep } from './TravelBookingFlow';
+import { format } from 'date-fns';
+
+interface City {
+  id: string;
+  name: string;
+  country: string;
+}
+
+interface Hotel {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface Flight {
+  id: string;
+  airline: string;
+  price: number;
+}
+
+interface BookingSummaryData {
+  step: string;
+  selectedCity?: City;
+  customCity?: string;
+  budget?: number;
+  budgetFlexible?: boolean;
+  selectedDuration?: { days: number };
+  customDuration?: number;
+  selectedHotel?: Hotel;
+  skipHotel?: boolean;
+  selectedFlight?: Flight;
+  skipFlight?: boolean;
+  startDate?: Date;
+  endDate?: Date;
+}
 
 interface BookingSummaryProps {
-  bookingState: BookingStep;
+  bookingState: BookingSummaryData;
   onConfirm: () => void;
   onStartOver: () => void;
 }
@@ -13,9 +47,20 @@ interface BookingSummaryProps {
 export const BookingSummary = ({ bookingState, onConfirm, onStartOver }: BookingSummaryProps) => {
   const { toast } = useToast();
 
+  // Add protective checks to prevent runtime errors
+  if (!bookingState) {
+    return (
+      <div className="text-center p-8">
+        <p>Loading booking summary...</p>
+      </div>
+    );
+  }
+
   const getTotalCost = () => {
     let total = 0;
-    const days = bookingState.selectedDuration?.days || bookingState.customDuration || 1;
+    const days = bookingState.startDate && bookingState.endDate 
+      ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+      : bookingState.selectedDuration?.days || bookingState.customDuration || 1;
     
     if (bookingState.selectedHotel) {
       total += bookingState.selectedHotel.price * days;
@@ -62,9 +107,20 @@ export const BookingSummary = ({ bookingState, onConfirm, onStartOver }: Booking
             <div className="flex justify-between">
               <span>Duration:</span>
               <span className="font-semibold">
-                {bookingState.selectedDuration?.days || bookingState.customDuration} days
+                {bookingState.startDate && bookingState.endDate 
+                  ? `${Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
+                  : `${bookingState.selectedDuration?.days || bookingState.customDuration} days`
+                }
               </span>
             </div>
+            {bookingState.startDate && bookingState.endDate && (
+              <div className="flex justify-between">
+                <span>Travel Dates:</span>
+                <span className="font-semibold">
+                  {format(bookingState.startDate, 'MMM dd')} - {format(bookingState.endDate, 'MMM dd, yyyy')}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span>Budget:</span>
               <span className="font-semibold">
@@ -81,8 +137,16 @@ export const BookingSummary = ({ bookingState, onConfirm, onStartOver }: Booking
           <CardContent className="space-y-3">
             {bookingState.selectedHotel ? (
               <div className="flex justify-between">
-                <span>Hotel ({bookingState.selectedDuration?.days || bookingState.customDuration} nights):</span>
-                <span>${bookingState.selectedHotel.price * (bookingState.selectedDuration?.days || bookingState.customDuration || 1)}</span>
+                <span>Hotel ({
+                  bookingState.startDate && bookingState.endDate 
+                    ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                    : bookingState.selectedDuration?.days || bookingState.customDuration || 1
+                } nights):</span>
+                <span>${bookingState.selectedHotel.price * (
+                  bookingState.startDate && bookingState.endDate 
+                    ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                    : bookingState.selectedDuration?.days || bookingState.customDuration || 1
+                )}</span>
               </div>
             ) : bookingState.skipHotel ? (
               <div className="flex justify-between">

@@ -6,14 +6,21 @@ import { MapPin, Calendar, DollarSign, Trash2, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { BookingStep } from './TravelBookingFlow';
 
-interface SavedPlan extends BookingStep {
+interface SavedPlan {
   id: string;
   savedAt: Date;
   planName: string;
+  locationInfo?: any;
+  budgetDurationData?: any;
+  activitiesData?: any;
+  hotelsData?: any;
+  flightsData?: any;
+  authData?: any;
+  membersData?: any;
 }
 
 interface SavedPlansManagerProps {
-  onLoadPlan: (plan: BookingStep) => void;
+  onLoadPlan: (plan: SavedPlan) => void;
 }
 
 export const SavedPlansManager = ({ onLoadPlan }: SavedPlansManagerProps) => {
@@ -74,21 +81,21 @@ export const SavedPlansManager = ({ onLoadPlan }: SavedPlansManagerProps) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  {(plan.selectedCity || plan.customCity) && (
+                  {(plan.locationInfo?.selectedCity || plan.locationInfo?.destination) && (
                     <Badge variant="secondary">
-                      {plan.selectedCity?.name || plan.customCity}
+                      {plan.locationInfo?.selectedCity?.name || plan.locationInfo?.destination}
                     </Badge>
                   )}
-                  {(plan.selectedDuration || plan.customDuration) && (
+                  {(plan.budgetDurationData?.selectedDuration || plan.budgetDurationData?.duration) && (
                     <Badge variant="secondary">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {plan.selectedDuration?.days || plan.customDuration} days
+                      {plan.budgetDurationData?.selectedDuration?.days || plan.budgetDurationData?.duration} days
                     </Badge>
                   )}
-                  {(plan.budget || plan.budgetFlexible) && (
+                  {(plan.budgetDurationData?.budget || plan.budgetDurationData?.budgetFlexible) && (
                     <Badge variant="secondary">
                       <DollarSign className="w-3 h-3 mr-1" />
-                      {plan.budgetFlexible ? 'Flexible' : `$${plan.budget}`}
+                      {plan.budgetDurationData?.budgetFlexible ? 'Flexible' : `$${plan.budgetDurationData?.budget}`}
                     </Badge>
                   )}
                 </div>

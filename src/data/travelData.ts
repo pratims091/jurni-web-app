@@ -55,49 +55,72 @@ export interface Flight {
 }
 
 export const mockCities: City[] = [
+  // Indian Cities
   {
-    id: "paris",
-    name: "Paris",
-    country: "France",
-    description: "The City of Light offers romance, culture, and incredible cuisine.",
+    id: "goa",
+    name: "Goa",
+    country: "India",
+    description: "Beautiful beaches, Portuguese heritage, and vibrant nightlife.",
     image: "/api/placeholder/400/300",
-    attractions: ["Eiffel Tower", "Louvre Museum", "Notre-Dame", "Arc de Triomphe", "Champs-Élysées"],
-    averageCost: 150,
-    bestTimeToVisit: "April to June, September to October",
-    popularActivities: ["Museum visits", "Seine river cruise", "Café culture", "Shopping", "Architecture tours"]
+    attractions: ["Baga Beach", "Old Goa Churches", "Dudhsagar Falls", "Calangute Beach", "Fort Aguada"],
+    averageCost: 60,
+    bestTimeToVisit: "November to March",
+    popularActivities: ["Beach activities", "Water sports", "Heritage tours", "Nightlife", "Local cuisine"]
   },
   {
-    id: "tokyo",
-    name: "Tokyo",
-    country: "Japan",
-    description: "A fascinating blend of traditional culture and cutting-edge technology.",
+    id: "kerala",
+    name: "Kerala",
+    country: "India", 
+    description: "God's Own Country with backwaters, hill stations, and spice plantations.",
     image: "/api/placeholder/400/300",
-    attractions: ["Senso-ji Temple", "Tokyo Skytree", "Shibuya Crossing", "Meiji Shrine", "Tsukiji Fish Market"],
-    averageCost: 180,
-    bestTimeToVisit: "March to May, September to November",
-    popularActivities: ["Temple visits", "Sushi experiences", "Shopping", "Technology tours", "Cherry blossom viewing"]
+    attractions: ["Alleppey Backwaters", "Munnar Hills", "Fort Kochi", "Periyar Wildlife Sanctuary", "Kovalam Beach"],
+    averageCost: 50,
+    bestTimeToVisit: "October to March",
+    popularActivities: ["Backwater cruises", "Ayurvedic treatments", "Wildlife viewing", "Tea plantation tours", "Cultural shows"]
   },
   {
-    id: "bali",
-    name: "Bali",
-    country: "Indonesia",
-    description: "Tropical paradise with stunning beaches, rice terraces, and spiritual culture.",
+    id: "rajasthan",
+    name: "Rajasthan",
+    country: "India",
+    description: "Land of Kings with magnificent palaces, forts, and desert landscapes.",
     image: "/api/placeholder/400/300",
-    attractions: ["Uluwatu Temple", "Rice Terraces of Jatiluwih", "Mount Batur", "Tanah Lot", "Ubud Monkey Forest"],
-    averageCost: 80,
-    bestTimeToVisit: "April to October",
-    popularActivities: ["Beach relaxation", "Surfing", "Yoga retreats", "Temple visits", "Volcano hiking"]
+    attractions: ["Amber Fort", "City Palace Udaipur", "Thar Desert", "Hawa Mahal", "Mehrangarh Fort"],
+    averageCost: 55,
+    bestTimeToVisit: "October to March",
+    popularActivities: ["Palace tours", "Desert safari", "Cultural performances", "Heritage walks", "Camel rides"]
   },
   {
-    id: "newyork",
-    name: "New York",
-    country: "USA",
-    description: "The city that never sleeps, offering world-class entertainment and dining.",
+    id: "himachal",
+    name: "Himachal Pradesh", 
+    country: "India",
+    description: "Mountain paradise with snow-capped peaks, valleys, and adventure activities.",
     image: "/api/placeholder/400/300",
-    attractions: ["Statue of Liberty", "Central Park", "Times Square", "Empire State Building", "Brooklyn Bridge"],
-    averageCost: 200,
-    bestTimeToVisit: "April to June, September to November",
-    popularActivities: ["Broadway shows", "Museum visits", "Shopping", "Food tours", "City skyline views"]
+    attractions: ["Manali", "Shimla", "Dharamshala", "Spiti Valley", "Rohtang Pass"],
+    averageCost: 65,
+    bestTimeToVisit: "March to June, September to November",
+    popularActivities: ["Trekking", "Paragliding", "Skiing", "Mountain biking", "Nature photography"]
+  },
+  {
+    id: "uttarakhand",
+    name: "Uttarakhand",
+    country: "India",
+    description: "Dev Bhoomi with holy rivers, hill stations, and spiritual destinations.",
+    image: "/api/placeholder/400/300", 
+    attractions: ["Rishikesh", "Haridwar", "Nainital", "Valley of Flowers", "Kedarnath"],
+    averageCost: 45,
+    bestTimeToVisit: "March to June, September to November",
+    popularActivities: ["River rafting", "Yoga retreats", "Pilgrimage tours", "Trekking", "Wildlife viewing"]
+  },
+  {
+    id: "karnataka",
+    name: "Karnataka",
+    country: "India",
+    description: "Rich heritage with palaces, temples, and diverse landscapes from coast to hills.",
+    image: "/api/placeholder/400/300",
+    attractions: ["Mysore Palace", "Hampi Ruins", "Coorg Hills", "Bangalore Gardens", "Gokarna Beach"],
+    averageCost: 50,
+    bestTimeToVisit: "October to March",
+    popularActivities: ["Palace tours", "Historical exploration", "Coffee plantation visits", "Beach relaxation", "City tours"]
   }
 ];
 

@@ -4,9 +4,7 @@ import { Footer } from '@/components/layout/Footer';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { FeaturesSection } from '@/components/sections/FeaturesSection';
 import { HowItWorksSection } from '@/components/sections/HowItWorksSection';
-import { PricingSection } from '@/components/sections/PricingSection';
-import { AboutSection } from '@/components/sections/AboutSection';
-import { TravelBookingFlow } from '@/components/travel/TravelBookingFlow';
+import { EnhancedTravelBookingFlow } from '@/components/travel/EnhancedTravelBookingFlow';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'landing' | 'booking'>('landing');
@@ -15,8 +13,6 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
-  const pricingRef = useRef<HTMLDivElement>(null);
-  const aboutRef = useRef<HTMLDivElement>(null);
 
   const handleNavigation = (section: string) => {
     if (section === 'booking') {
@@ -30,8 +26,6 @@ const Index = () => {
       'home': heroRef,
       'features': featuresRef,
       'how-it-works': howItWorksRef,
-      'pricing': pricingRef,
-      'about': aboutRef,
     };
 
     const targetRef = refs[section as keyof typeof refs];
@@ -52,7 +46,7 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Navigation onNavigate={handleNavigation} />
         <div className="pt-16">
-          <TravelBookingFlow />
+          <EnhancedTravelBookingFlow />
         </div>
       </div>
     );
@@ -73,14 +67,6 @@ const Index = () => {
         
         <div ref={howItWorksRef}>
           <HowItWorksSection />
-        </div>
-        
-        <div ref={pricingRef}>
-          <PricingSection />
-        </div>
-        
-        <div ref={aboutRef}>
-          <AboutSection />
         </div>
       </main>
 

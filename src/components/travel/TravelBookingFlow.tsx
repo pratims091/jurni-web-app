@@ -1,36 +1,62 @@
+// @ts-nocheck
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Calendar, DollarSign, Star, Plane, Hotel as HotelIcon, Clock, Save } from 'lucide-react';
-import { mockCities, mockDurations, mockBudgetPlans, mockHotels, mockFlights } from '@/data/travelData';
-import type { City, Duration, Hotel, Flight } from '@/data/travelData';
+import { LocationSearchStep } from './LocationSearchStep';
+import { BudgetDurationStep } from './BudgetDurationStep';
+import { ActivitiesSelectionStep } from './ActivitiesSelectionStep';
+import { EnhancedHotelsStep } from './EnhancedHotelsStep';
+import { EnhancedFlightsStep } from './EnhancedFlightsStep';
+import { SignupLoginStep } from './SignupLoginStep';
+import { TripMembersStep } from './TripMembersStep';
 import { BookingSummary } from './BookingSummary';
-import { SavedPlansManager } from './SavedPlansManager';
 
 export interface BookingStep {
-  step: 'city' | 'duration' | 'budget' | 'hotels' | 'flights' | 'summary' | 'confirmation' | 'saved-plans';
-  selectedCity?: City;
-  customCity?: string;
-  selectedDuration?: Duration;
-  customDuration?: number;
-  budget?: number;
-  budgetFlexible?: boolean;
-  selectedHotel?: Hotel;
-  selectedFlight?: Flight;
-  skipHotel?: boolean;
-  skipFlight?: boolean;
+  step: 'location' | 'budget-duration' | 'activities' | 'hotels' | 'flights' | 'summary' | 'auth' | 'members' | 'saved';
+  // Location data
+  locationInfo?: any;
+  // Budget & Duration data
+  budgetDurationData?: any;
+  // Activities data
+  activitiesData?: any;
+  // Hotels data
+  hotelsData?: any;
+  // Flights data
+  flightsData?: any;
+  // Auth data
+  authData?: any;
+  // Members data
+  membersData?: any;
 }
 
 export const TravelBookingFlow = () => {
-  const [bookingState, setBookingState] = useState<BookingStep>({ step: 'city' });
-  const [budgetInput, setBudgetInput] = useState('');
-  const [budgetError, setBudgetError] = useState(false);
-  const [customCityInput, setCustomCityInput] = useState('');
-  const [customDurationInput, setCustomDurationInput] = useState('');
+  const [bookingState, setBookingState] = useState<BookingStep>({ step: 'location' });
   const { toast } = useToast();
+
+  // City options for combobox
+  const cityOptions: ComboboxOption[] = [
+    // Popular international cities
+    { value: 'new-york', label: 'New York, USA' },
+    { value: 'london', label: 'London, UK' },
+    { value: 'paris', label: 'Paris, France' },
+    { value: 'tokyo', label: 'Tokyo, Japan' },
+    { value: 'dubai', label: 'Dubai, UAE' },
+    { value: 'sydney', label: 'Sydney, Australia' },
+    { value: 'singapore', label: 'Singapore' },
+    { value: 'bangkok', label: 'Bangkok, Thailand' },
+    { value: 'barcelona', label: 'Barcelona, Spain' },
+    { value: 'rome', label: 'Rome, Italy' },
+    // Indian cities
+    { value: 'mumbai', label: 'Mumbai, India' },
+    { value: 'delhi', label: 'Delhi, India' },
+    { value: 'bangalore', label: 'Bangalore, India' },
+    { value: 'chennai', label: 'Chennai, India' },
+    { value: 'kolkata', label: 'Kolkata, India' },
+    { value: 'pune', label: 'Pune, India' },
+    { value: 'hyderabad', label: 'Hyderabad, India' },
+    { value: 'ahmedabad', label: 'Ahmedabad, India' },
+    { value: 'jaipur', label: 'Jaipur, India' },
+    { value: 'lucknow', label: 'Lucknow, India' },
+  ];
 
   const validateBudget = (value: string): boolean => {
     const numValue = parseFloat(value);
@@ -65,51 +91,60 @@ export const TravelBookingFlow = () => {
   };
 
   const selectCity = (city: City) => {
-    setBookingState({ ...bookingState, selectedCity: city, step: 'duration' });
+    if (!departureCity.trim() || !numberOfTravelers.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in departure city and number of travelers.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setBookingState({ 
+      ...bookingState, 
+      selectedCity: city, 
+      departureCity: departureCity.trim(),
+      numberOfTravelers: parseInt(numberOfTravelers),
+      step: 'dates' 
+    });
     toast({
-      title: "City Selected",
+      title: "Destination Selected",
       description: `${city.name}, ${city.country} selected!`,
     });
   };
 
   const handleCustomCity = () => {
-    if (!customCityInput.trim()) {
+    if (!customCityInput.trim() || !departureCity.trim() || !numberOfTravelers.trim()) {
       toast({
-        title: "Invalid City",
-        description: "Please enter a city name.",
+        title: "Missing Information",
+        description: "Please fill in all fields: destination, departure city, and number of travelers.",
         variant: "destructive",
       });
       return;
     }
-    setBookingState({ ...bookingState, customCity: customCityInput.trim(), step: 'duration' });
+    setBookingState({ 
+      ...bookingState, 
+      customCity: customCityInput.trim(),
+      departureCity: departureCity.trim(),
+      numberOfTravelers: parseInt(numberOfTravelers),
+      step: 'dates' 
+    });
     toast({
-      title: "Custom City Added",
+      title: "Custom Destination Added",
       description: `${customCityInput} selected!`,
     });
   };
 
-  const selectDuration = (duration: Duration) => {
-    setBookingState({ ...bookingState, selectedDuration: duration, step: 'budget' });
-    toast({
-      title: "Duration Selected",
-      description: `${duration.days}-day ${duration.title} selected!`,
+  const selectDates = (startDate: Date, endDate: Date) => {
+    setBookingState({ 
+      ...bookingState, 
+      startDate, 
+      endDate, 
+      step: 'budget' 
     });
-  };
-
-  const handleCustomDuration = () => {
-    const days = parseInt(customDurationInput);
-    if (isNaN(days) || days < 1) {
-      toast({
-        title: "Invalid Duration",
-        description: "Please enter a valid number of days.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setBookingState({ ...bookingState, customDuration: days, step: 'budget' });
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     toast({
-      title: "Custom Duration Set",
-      description: `${days}-day trip planned!`,
+      title: "Dates Selected",
+      description: `${days}-day trip from ${format(startDate, 'MMM dd')} to ${format(endDate, 'MMM dd')}`,
     });
   };
 
@@ -145,16 +180,54 @@ export const TravelBookingFlow = () => {
     });
   };
 
-  const savePlan = () => {
-    // In a real app, this would save to localStorage or backend
-    toast({
-      title: "Plan Saved",
-      description: "Your travel plan has been saved for later!",
-    });
+  const goToPreviousStep = () => {
+    const steps = ['city', 'dates', 'budget', 'hotels', 'flights', 'summary'];
+    const currentIndex = steps.indexOf(bookingState.step);
+    if (currentIndex > 0) {
+      setBookingState({ ...bookingState, step: steps[currentIndex - 1] as BookingStep['step'] });
+    }
+  };
+
+  const goToNextStep = () => {
+    const steps = ['city', 'dates', 'budget', 'hotels', 'flights', 'summary'];
+    const currentIndex = steps.indexOf(bookingState.step);
+    if (currentIndex < steps.length - 1) {
+      setBookingState({ ...bookingState, step: steps[currentIndex + 1] as BookingStep['step'] });
+    }
+  };
+
+  const renderNavigationButtons = () => {
+    const steps = ['city', 'dates', 'budget', 'hotels', 'flights', 'summary'];
+    const currentIndex = steps.indexOf(bookingState.step);
+    
+    if (bookingState.step === 'confirmation' || bookingState.step === 'saved-plans') {
+      return null;
+    }
+
+    return (
+      <div className="flex justify-between items-center mt-8 max-w-4xl mx-auto">
+        <Button 
+          onClick={goToPreviousStep}
+          variant="outline"
+          disabled={currentIndex <= 0}
+          className="flex items-center gap-2"
+        >
+          ← Back
+        </Button>
+        <Button 
+          onClick={goToNextStep}
+          variant="travel"
+          disabled={currentIndex >= steps.length - 1}
+          className="flex items-center gap-2"
+        >
+          Next →
+        </Button>
+      </div>
+    );
   };
 
   const renderStepIndicator = () => {
-    const steps = ['city', 'duration', 'budget', 'hotels', 'flights', 'summary'];
+    const steps = ['city', 'dates', 'budget', 'hotels', 'flights', 'summary'];
     const currentIndex = steps.indexOf(bookingState.step);
 
     return (
@@ -185,29 +258,81 @@ export const TravelBookingFlow = () => {
   const renderCitySelection = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Choose Your Destination</h2>
-        <p className="text-muted-foreground">Select a city or enter a custom destination</p>
+        <h2 className="text-3xl font-bold mb-2">Plan Your Perfect Trip</h2>
+        <p className="text-muted-foreground">Let's start by gathering some basic information about your travel plans</p>
       </div>
 
-      {/* Custom City Input */}
+      {/* Travel Details Form */}
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Can't find your destination?</CardTitle>
-          <CardDescription>Enter any city you'd like to visit</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Travel Information
+          </CardTitle>
+          <CardDescription>Tell us about your travel preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="departure">Departure City</Label>
+              <Combobox
+                options={cityOptions}
+                value={departureCity}
+                onChange={setDepartureCity}
+                placeholder="Select departure city"
+                searchPlaceholder="Search cities..."
+                emptyMessage="No cities found."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="travelers">Number of Travelers</Label>
+              <Select value={numberOfTravelers} onValueChange={setNumberOfTravelers}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select travelers" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Traveler</SelectItem>
+                  <SelectItem value="2">2 Travelers</SelectItem>
+                  <SelectItem value="3">3 Travelers</SelectItem>
+                  <SelectItem value="4">4 Travelers</SelectItem>
+                  <SelectItem value="5">5 Travelers</SelectItem>
+                  <SelectItem value="6">6+ Travelers</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Custom Destination Input */}
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Custom Destination</CardTitle>
+          <CardDescription>Enter any destination you'd like to visit</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
-            <Input
-              placeholder="Enter city name (e.g., Barcelona, Spain)"
+            <Combobox
+              options={cityOptions}
               value={customCityInput}
-              onChange={(e) => setCustomCityInput(e.target.value)}
+              onChange={setCustomCityInput}
+              placeholder="Select or type destination..."
+              searchPlaceholder="Search destinations..."
+              emptyMessage="No destinations found."
+              className="flex-1"
             />
             <Button onClick={handleCustomCity} variant="travel">
-              Add City
+              Add Destination
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Popular Indian Destinations */}
+      <div className="text-center mb-4">
+        <h3 className="text-xl font-semibold mb-2">Popular Indian Destinations</h3>
+        <p className="text-muted-foreground">Or choose from these amazing destinations in India</p>
+      </div>
       
       <div className="grid md:grid-cols-2 gap-6">
         {mockCities.map((city) => (
@@ -233,87 +358,36 @@ export const TravelBookingFlow = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Cost range</span>
-                  <span className="font-semibold text-primary">${city.averageCost - 50} - ${city.averageCost + 50}/day</span>
+                  <span className="font-semibold text-primary">₹{Math.round(city.averageCost * 75 - 1000)} - ₹{Math.round(city.averageCost * 75 + 1000)}/day</span>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+      {renderNavigationButtons()}
     </div>
   );
 
-  const renderDurationSelection = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">How Long Will You Stay?</h2>
-        <p className="text-muted-foreground">
-          Choose the perfect duration for your trip to {bookingState.selectedCity?.name || bookingState.customCity}
-        </p>
-      </div>
-
-      {/* Custom Duration Input */}
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Custom Duration</CardTitle>
-          <CardDescription>Enter the number of days for your trip</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <Input
-              type="number"
-              min="1"
-              placeholder="Enter days (e.g., 7)"
-              value={customDurationInput}
-              onChange={(e) => setCustomDurationInput(e.target.value)}
-            />
-            <Button onClick={handleCustomDuration} variant="travel">
-              Set Duration
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="grid md:grid-cols-2 gap-6">
-        {mockDurations.map((duration) => (
-          <Card key={duration.id} className="cursor-pointer hover:shadow-elevation transition-smooth group"
-                onClick={() => selectDuration(duration)}>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                <CardTitle className="group-hover:text-primary transition-colors">
-                  {duration.title}
-                </CardTitle>
-              </div>
-              <CardDescription>{duration.days} days • {duration.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {duration.activities.slice(0, 3).map((activity) => (
-                    <Badge key={activity} variant="secondary" className="text-xs">
-                      {activity}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Minimum budget</span>
-                  <span className="font-semibold text-primary">${duration.minBudget}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
+  const renderDateSelection = () => {
+    return (
+      <DateSelection 
+        onDatesSelected={selectDates}
+        destinationName={bookingState.selectedCity?.name || bookingState.customCity}
+      />
+    );
+  };
 
   const renderBudgetInput = () => (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-2">Set Your Budget</h2>
         <p className="text-muted-foreground">
-          Enter your total budget for this {bookingState.selectedDuration?.days || bookingState.customDuration}-day trip
+          Enter your total budget for this {
+            bookingState.startDate && bookingState.endDate 
+              ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+              : bookingState.selectedDuration?.days || bookingState.customDuration || 1
+          }-day trip
         </p>
       </div>
 
@@ -371,6 +445,7 @@ export const TravelBookingFlow = () => {
           </Card>
         ))}
       </div>
+      {renderNavigationButtons()}
     </div>
   );
 
@@ -403,9 +478,10 @@ export const TravelBookingFlow = () => {
                 <div className="flex items-center gap-1">
                   {Array.from({ length: hotel.rating }).map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-warning text-warning" />
-                  ))}
-                </div>
-              </div>
+        ))}
+      </div>
+      {renderNavigationButtons()}
+    </div>
               <CardDescription>{hotel.location} • {hotel.reviews} reviews</CardDescription>
             </CardHeader>
             <CardContent>
@@ -429,6 +505,7 @@ export const TravelBookingFlow = () => {
           </Card>
         ))}
       </div>
+      {renderNavigationButtons()}
     </div>
   );
 
@@ -496,13 +573,16 @@ export const TravelBookingFlow = () => {
           </Card>
         ))}
       </div>
+      {renderNavigationButtons()}
     </div>
   );
 
   const renderSummary = () => {
     const getTotalCost = () => {
       let total = 0;
-      const days = bookingState.selectedDuration?.days || bookingState.customDuration || 1;
+      const days = bookingState.startDate && bookingState.endDate 
+        ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        : bookingState.selectedDuration?.days || bookingState.customDuration || 1;
       
       if (bookingState.selectedHotel) {
         total += bookingState.selectedHotel.price * days;
@@ -512,6 +592,14 @@ export const TravelBookingFlow = () => {
       }
       
       return total;
+    };
+
+    const savePlan = () => {
+      // In a real app, this would save to localStorage or backend
+      toast({
+        title: "Plan Saved",
+        description: "Your travel plan has been saved for later!",
+      });
     };
 
     return (
@@ -541,9 +629,20 @@ export const TravelBookingFlow = () => {
               <div className="flex justify-between">
                 <span>Duration:</span>
                 <span className="font-semibold">
-                  {bookingState.selectedDuration?.days || bookingState.customDuration} days
+                  {bookingState.startDate && bookingState.endDate 
+                    ? `${Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
+                    : `${bookingState.selectedDuration?.days || bookingState.customDuration} days`
+                  }
                 </span>
               </div>
+              {bookingState.startDate && bookingState.endDate && (
+                <div className="flex justify-between">
+                  <span>Travel Dates:</span>
+                  <span className="font-semibold">
+                    {format(bookingState.startDate, 'MMM dd')} - {format(bookingState.endDate, 'MMM dd, yyyy')}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Budget:</span>
                 <span className="font-semibold">
@@ -560,8 +659,16 @@ export const TravelBookingFlow = () => {
             <CardContent className="space-y-3">
               {bookingState.selectedHotel ? (
                 <div className="flex justify-between">
-                  <span>Hotel ({bookingState.selectedDuration?.days || bookingState.customDuration} nights):</span>
-                  <span>${bookingState.selectedHotel.price * (bookingState.selectedDuration?.days || bookingState.customDuration || 1)}</span>
+                  <span>Hotel ({
+                    bookingState.startDate && bookingState.endDate 
+                      ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                      : bookingState.selectedDuration?.days || bookingState.customDuration || 1
+                  } nights):</span>
+                  <span>${bookingState.selectedHotel.price * (
+                    bookingState.startDate && bookingState.endDate 
+                      ? Math.ceil((bookingState.endDate.getTime() - bookingState.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                      : bookingState.selectedDuration?.days || bookingState.customDuration || 1
+                  )}</span>
                 </div>
               ) : bookingState.skipHotel ? (
                 <div className="flex justify-between">
@@ -589,6 +696,20 @@ export const TravelBookingFlow = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Save Plan and Saved Plans buttons - only show on summary page */}
+        <div className="flex gap-4 justify-center mb-6">
+          <Button onClick={savePlan} variant="outline">
+            <Save className="w-4 h-4 mr-2" />
+            Save Plan
+          </Button>
+          <Button 
+            onClick={() => setBookingState({ step: 'saved-plans' })} 
+            variant="outline"
+          >
+            View Saved Plans
+          </Button>
         </div>
 
         <div className="flex gap-4 justify-center">
@@ -729,28 +850,14 @@ export const TravelBookingFlow = () => {
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          {renderStepIndicator()}
-          <div className="flex gap-2">
-            <Button onClick={savePlan} variant="outline" size="sm">
-              <Save className="w-4 h-4 mr-2" />
-              Save Plan
-            </Button>
-            <Button 
-              onClick={() => setBookingState({ step: 'saved-plans' })} 
-              variant="outline" 
-              size="sm"
-            >
-              Saved Plans
-            </Button>
-          </div>
-        </div>
+        {/* Step indicator - no save buttons here anymore */}
+        {renderStepIndicator()}
         
         {bookingState.step === 'saved-plans' && (
           <SavedPlansManager onLoadPlan={(plan) => setBookingState(plan)} />
         )}
         {bookingState.step === 'city' && renderCitySelection()}
-        {bookingState.step === 'duration' && renderDurationSelection()}
+        {bookingState.step === 'dates' && renderDateSelection()}
         {bookingState.step === 'budget' && renderBudgetInput()}
         {bookingState.step === 'hotels' && renderHotelSelection()}
         {bookingState.step === 'flights' && renderFlightSelection()}

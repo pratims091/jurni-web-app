@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Plane } from 'lucide-react';
+import { GoogleTranslate } from '@/components/ui/google-translate';
 
 interface NavigationProps {
   onNavigate: (section: string) => void;
@@ -53,6 +54,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
+            <GoogleTranslate />
             <Button 
               variant="ghost" 
               onClick={() => handleNavClick('booking')}
@@ -86,6 +88,9 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                   </button>
                 ))}
                 <div className="pt-6 border-t border-border space-y-4">
+                  <div className="flex justify-center">
+                    <GoogleTranslate />
+                  </div>
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start"
