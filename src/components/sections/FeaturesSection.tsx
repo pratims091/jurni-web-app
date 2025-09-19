@@ -1,67 +1,70 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Calendar, DollarSign, Hotel, Plane, Shield, Clock, Heart } from 'lucide-react';
-
-const features = [
-  {
-    icon: MapPin,
-    title: "Smart Destination Selection",
-    description: "Discover perfect destinations based on your preferences, budget, and travel style with our intelligent recommendation system.",
-    color: "text-primary"
-  },
-  {
-    icon: Calendar,
-    title: "Flexible Duration Planning",
-    description: "Choose from quick getaways to extended adventures. Each duration comes with optimized activity suggestions.",
-    color: "text-accent"
-  },
-  {
-    icon: DollarSign,
-    title: "Budget-Optimized Planning",
-    description: "Get personalized travel plans that maximize your experience within your budget, from economy to luxury options.",
-    color: "text-success"
-  },
-  {
-    icon: Hotel,
-    title: "Curated Accommodations",
-    description: "Choose from a wide range of verified hotels and stays, filtered by your preferences and budget requirements.",
-    color: "text-warning"
-  },
-  {
-    icon: Plane,
-    title: "Flight Comparison",
-    description: "Compare flights from multiple airlines to find the best deals and most convenient travel options for your trip.",
-    color: "text-primary"
-  },
-  {
-    icon: Shield,
-    title: "Secure Booking",
-    description: "Your bookings are protected with industry-standard security measures and comprehensive travel insurance options.",
-    color: "text-accent"
-  },
-  {
-    icon: Clock,
-    title: "24/7 Support",
-    description: "Get assistance whenever you need it with our round-the-clock customer support team and travel experts.",
-    color: "text-success"
-  },
-  {
-    icon: Heart,
-    title: "Personalized Experience",
-    description: "Every trip is tailored to your unique preferences, creating unforgettable experiences that match your travel dreams.",
-    color: "text-warning"
-  }
-];
+import { useTranslation } from 'react-i18next';
 
 export const FeaturesSection = () => {
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      icon: MapPin,
+      title: t('smart_destination_selection'),
+      description: t('smart_destination_selection_desc'),
+      color: "text-primary"
+    },
+    {
+      icon: Calendar,
+      title: t('flexible_duration_planning'),
+      description: t('flexible_duration_planning_desc'),
+      color: "text-accent"
+    },
+    {
+      icon: DollarSign,
+      title: t('budget_optimized_planning'),
+      description: t('budget_optimized_planning_desc'),
+      color: "text-success"
+    },
+    {
+      icon: Hotel,
+      title: t('curated_accommodations'),
+      description: t('curated_accommodations_desc'),
+      color: "text-warning"
+    },
+    {
+      icon: Plane,
+      title: t('flight_comparison'),
+      description: t('flight_comparison_desc'),
+      color: "text-primary"
+    },
+    {
+      icon: Shield,
+      title: t('secure_booking'),
+      description: t('secure_booking_desc'),
+      color: "text-accent"
+    },
+    {
+      icon: Clock,
+      title: t('support_24_7'),
+      description: t('support_24_7_desc'),
+      color: "text-success"
+    },
+    {
+      icon: Heart,
+      title: t('personalized_experience'),
+      description: t('personalized_experience_desc'),
+      color: "text-warning"
+    }
+  ];
+
   return (
     <section className="py-24 bg-gradient-card">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Why Choose Our Travel Platform?
+            {t('features_title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We combine cutting-edge technology with travel expertise to deliver exceptional journey planning experiences that exceed your expectations.
+            {t('features_subtitle')}
           </p>
         </div>
 

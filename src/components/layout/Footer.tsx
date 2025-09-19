@@ -2,12 +2,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Plane, MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FooterProps {
   onNavigate: (section: string) => void;
 }
 
 export const Footer = ({ onNavigate }: FooterProps) => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -23,7 +25,7 @@ export const Footer = ({ onNavigate }: FooterProps) => {
               <span className="text-xl font-bold">TravelPlan</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Making dream trips accessible to everyone through intelligent planning and personalized experiences.
+              {t('footer_description')}
             </p>
             <div className="flex space-x-3">
               <Button variant="ghost" size="icon" className="hover:text-primary">
@@ -43,14 +45,13 @@ export const Footer = ({ onNavigate }: FooterProps) => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Quick Links</h3>
+            <h3 className="text-lg font-semibold">{t('quick_links')}</h3>
             <div className="space-y-3">
               {[
-                { label: 'Home', value: 'home' },
-                { label: 'Features', value: 'features' },
-                { label: 'How It Works', value: 'how-it-works' },
-                { label: 'Pricing', value: 'pricing' },
-                { label: 'About Us', value: 'about' },
+                { label: t('home'), value: 'home' },
+                { label: t('features'), value: 'features' },
+                { label: t('how_it_works'), value: 'how-it-works' },
+                { label: t('about_us'), value: 'about' },
               ].map((link) => (
                 <button
                   key={link.value}
@@ -65,14 +66,14 @@ export const Footer = ({ onNavigate }: FooterProps) => {
 
           {/* Support */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Support</h3>
+            <h3 className="text-lg font-semibold">{t('support')}</h3>
             <div className="space-y-3">
               {[
-                'Help Center',
-                'Travel Insurance',
-                'Booking Support',
-                'Cancellation Policy',
-                'Travel Guidelines',
+                t('help_center'),
+                t('travel_insurance'),
+                t('booking_support'),
+                t('cancellation_policy'),
+                t('travel_guidelines'),
               ].map((item) => (
                 <div key={item} className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                   {item}
@@ -83,18 +84,18 @@ export const Footer = ({ onNavigate }: FooterProps) => {
 
           {/* Newsletter */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Stay Updated</h3>
+            <h3 className="text-lg font-semibold">{t('stay_updated')}</h3>
             <p className="text-muted-foreground text-sm">
-              Subscribe to get travel tips, exclusive deals, and destination inspiration.
+              {t('newsletter_prompt')}
             </p>
             <div className="space-y-3">
               <Input 
                 type="email" 
-                placeholder="Enter your email" 
+                placeholder={t('enter_your_email')}
                 className="bg-background"
               />
               <Button variant="travel" className="w-full">
-                Subscribe
+                {t('subscribe')}
               </Button>
             </div>
           </div>
@@ -107,22 +108,22 @@ export const Footer = ({ onNavigate }: FooterProps) => {
           <div className="flex items-center gap-3">
             <MapPin className="w-5 h-5 text-primary" />
             <div>
-              <p className="font-medium">Head Office</p>
-              <p className="text-sm text-muted-foreground">123 Travel Street, City, Country</p>
+              <p className="font-medium">{t('head_office')}</p>
+              <p className="text-sm text-muted-foreground">{t('head_office_address')}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="w-5 h-5 text-primary" />
             <div>
-              <p className="font-medium">Phone Support</p>
-              <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
+              <p className="font-medium">{t('phone_support')}</p>
+              <p className="text-sm text-muted-foreground">{t('phone_support_number')}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Mail className="w-5 h-5 text-primary" />
             <div>
-              <p className="font-medium">Email Support</p>
-              <p className="text-sm text-muted-foreground">support@travelplan.com</p>
+              <p className="font-medium">{t('email_support')}</p>
+              <p className="text-sm text-muted-foreground">{t('email_support_address')}</p>
             </div>
           </div>
         </div>
@@ -132,12 +133,12 @@ export const Footer = ({ onNavigate }: FooterProps) => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-muted-foreground text-sm">
-            © {currentYear} TravelPlan. All rights reserved.
+            © {currentYear} TravelPlan. {t('all_rights_reserved')}
           </p>
           <div className="flex space-x-6 text-sm text-muted-foreground">
-            <button className="hover:text-primary transition-colors">Privacy Policy</button>
-            <button className="hover:text-primary transition-colors">Terms of Service</button>
-            <button className="hover:text-primary transition-colors">Cookie Policy</button>
+            <button className="hover:text-primary transition-colors">{t('privacy_policy')}</button>
+            <button className="hover:text-primary transition-colors">{t('terms_of_service')}</button>
+            <button className="hover:text-primary transition-colors">{t('cookie_policy')}</button>
           </div>
         </div>
       </div>

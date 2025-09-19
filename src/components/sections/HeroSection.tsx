@@ -1,12 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, MapPin, Calendar, DollarSign } from 'lucide-react';
 import heroImage from '@/assets/hero-travel.jpg';
+import { useTranslation } from 'react-i18next';
 
 interface HeroSectionProps {
   onStartBooking: () => void;
 }
 
 export const HeroSection = ({ onStartBooking }: HeroSectionProps) => {
+  const { t } = useTranslation();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -21,14 +24,14 @@ export const HeroSection = ({ onStartBooking }: HeroSectionProps) => {
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
         <div className="max-w-4xl mx-auto space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-            Your Dream Trip
+            {t('your_dream_trip')}
             <span className="block bg-gradient-hero bg-clip-text text-transparent">
-              Starts Here
+              {t('starts_here')}
             </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Discover amazing destinations, book perfect accommodations, and create unforgettable memories with our intelligent travel planning platform.
+            {t('hero_description')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -38,22 +41,22 @@ export const HeroSection = ({ onStartBooking }: HeroSectionProps) => {
               size="xl"
               className="group"
             >
-              Start Planning Your Trip
+              {t('start_planning_your_trip')}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             
             <div className="flex items-center gap-6 text-white/80">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
-                <span>100+ Destinations</span>
+                <span>{t('destinations')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                <span>Flexible Dates</span>
+                <span>{t('flexible_dates')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5" />
-                <span>Best Prices</span>
+                <span>{t('best_prices')}</span>
               </div>
             </div>
           </div>
