@@ -61,7 +61,11 @@ export const EnhancedTravelBookingFlow = () => {
   };
 
   const handleDayPlannerNext = (data: any) => {
-    setTripData({ ...tripData, dayPlansData: data });
+    const dayPlansData = {
+      dayPlans: data,
+      totalCost: data.reduce((total: number, day: any) => total + day.totalCost, 0),
+    };
+    setTripData({ ...tripData, dayPlansData });
     setCurrentStep('hotels');
   };
 
@@ -87,7 +91,6 @@ export const EnhancedTravelBookingFlow = () => {
   const handleMembersNext = (data: any) => {
     setTripData({ ...tripData, membersData: data });
     
-    // Save complete trip to localStorage
     const completeTrip = {
       id: Date.now().toString(),
       ...tripData,
@@ -160,7 +163,7 @@ export const EnhancedTravelBookingFlow = () => {
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
             budget={tripData.budgetDurationData?.budget || 50000}
             duration={tripData.budgetDurationData?.duration || 5}
-            travelers={tripData.locationInfo?.numberOfTravelers || 2}
+            travelers={tripData.locationInfo?.travelers.length || 2}
           />
         );
         
@@ -169,39 +172,19 @@ export const EnhancedTravelBookingFlow = () => {
           <EnhancedFlightsStep
             onNext={handleFlightsNext}
             onBack={goToPreviousStep}
-            destination={tripData.locationInfo?.destination || 'Selected Destination'}
-            departureCity={tripData.locationInfo?.departureCity || 'Your City'}
-            departureDate="2024-01-15"
-            returnDate="2024-01-20"
-            travelers={tripData.locationInfo?.numberOfTravelers || 2}
           />
         );
         
       case 'summary':
-        // Calculate final cost
-        const hotelCost = tripData.hotelsData?.selectedHotel ? 
-          tripData.hotelsData.selectedHotel.price * (tripData.budgetDurationData?.duration || 5) : 0;
-        const flightCost = tripData.flightsData?.selectedFlight?.price || 0;
-        const activitiesCost = tripData.dayPlansData?.reduce((sum: number, day: any) => sum + day.totalCost, 0) || 0;
-        const finalCost = hotelCost + flightCost + activitiesCost;
-
         return (
           <FinalItinerary 
-            destination={tripData.locationInfo?.destination || 'Selected Destination'}
-            duration={tripData.budgetDurationData?.duration || 5}
-            budget={tripData.budgetDurationData?.budget || 50000}
-            isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible || false}
-            finalCost={finalCost}
-            dayPlans={tripData.dayPlansData || []}
-            hotel={tripData.hotelsData?.selectedHotel}
-            flight={tripData.flightsData?.selectedFlight}
-            members={tripData.membersData?.members || []}
+            locationInfo={tripData.locationInfo}
+            budgetDurationData={tripData.budgetDurationData}
+            activitiesData={tripData.dayPlansData}
+            selectedHotel={tripData.hotelsData?.selectedHotel}
+            selectedFlight={tripData.flightsData?.selectedFlight}
             userEmail={tripData.authData?.user?.email || ''}
-            startDate={tripData.budgetDurationData?.startDate}
-            endDate={tripData.budgetDurationData?.endDate}
-            onConfirm={() => {
-              handleSummaryNext();
-            }}
+            onConfirm={handleSummaryNext}
             onStartOver={() => {
               setCurrentStep('location');
               setTripData({});
@@ -222,7 +205,7 @@ export const EnhancedTravelBookingFlow = () => {
           <TripMembersStep
             onNext={handleMembersNext}
             onBack={goToPreviousStep}
-            totalTravelers={tripData.locationInfo?.numberOfTravelers || 2}
+            totalTravelers={tripData.locationInfo?.travelers.length || 2}
             userEmail={tripData.authData?.user?.email || ''}
             userName={tripData.authData?.user?.name || ''}
           />

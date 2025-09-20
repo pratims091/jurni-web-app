@@ -2,21 +2,22 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Plane } from 'lucide-react';
-import { GoogleTranslate } from '@/components/ui/google-translate';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { useTranslation } from 'react-i18next';
 
 interface NavigationProps {
   onNavigate: (section: string) => void;
 }
 
 export const Navigation = ({ onNavigate }: NavigationProps) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: 'Home', value: 'home' },
-    { label: 'Features', value: 'features' },
-    { label: 'How It Works', value: 'how-it-works' },
-    { label: 'Pricing', value: 'pricing' },
-    { label: 'About', value: 'about' },
+    { label: t('home'), value: 'home' },
+    { label: t('features'), value: 'features' },
+    { label: t('how_it_works'), value: 'how-it-works' },
+    { label: t('about'), value: 'about' },
   ];
 
   const handleNavClick = (value: string) => {
@@ -54,18 +55,18 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
-            <GoogleTranslate />
+            <LanguageSwitcher />
             <Button 
               variant="ghost" 
               onClick={() => handleNavClick('booking')}
             >
-              Sign In
+              {t('sign_in')}
             </Button>
             <Button 
               variant="travel" 
               onClick={() => handleNavClick('booking')}
             >
-              Start Planning
+              {t('start_planning')}
             </Button>
           </div>
 
@@ -89,21 +90,21 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
                 ))}
                 <div className="pt-6 border-t border-border space-y-4">
                   <div className="flex justify-center">
-                    <GoogleTranslate />
+                    <LanguageSwitcher />
                   </div>
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start"
                     onClick={() => handleNavClick('booking')}
                   >
-                    Sign In
+                    {t('sign_in')}
                   </Button>
                   <Button 
                     variant="travel" 
                     className="w-full"
                     onClick={() => handleNavClick('booking')}
                   >
-                    Start Planning
+                    {t('start_planning')}
                   </Button>
                 </div>
               </div>
