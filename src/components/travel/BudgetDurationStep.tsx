@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,19 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
-  DollarSign, 
+  IndianRupee, 
   Calendar, 
   Wallet, 
-  Star, 
-  MapPin, 
-  Clock,
-  ChevronDown,
-  ChevronUp
+  Star
 } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar as CalendarIcon } from "lucide-react"
-import { addDays, format } from "date-fns"
+import { addDays, format, differenceInDays } from "date-fns"
 import { DateRange } from "react-day-picker"
  
 import { cn } from "@/lib/utils"
@@ -31,6 +26,7 @@ import {
 
 interface BudgetDurationData {
   budget: number;
+  duration: number;
   startDate: Date;
   endDate: Date;
   currency: string;
@@ -50,18 +46,9 @@ interface TripPlan {
   duration: number;
   budget: number;
   description: string;
-  dailyItinerary: DayPlan[];
   includes: string[];
   accommodationType: string;
   rating: number;
-}
-
-interface DayPlan {
-  day: number;
-  title: string;
-  activities: string[];
-  meals: string[];
-  accommodation: string;
 }
 
 const defaultTripPlans: TripPlan[] = [
@@ -74,29 +61,6 @@ const defaultTripPlans: TripPlan[] = [
     rating: 4.2,
     includes: ['Budget accommodation', 'Local transport', 'Breakfast included', '2 guided tours'],
     accommodationType: 'Budget hotels & hostels',
-    dailyItinerary: [
-      {
-        day: 1,
-        title: 'Arrival & City Orientation',
-        activities: ['Airport pickup', 'Hotel check-in', 'Local market visit', 'Welcome dinner'],
-        meals: ['Welcome dinner at local restaurant'],
-        accommodation: 'Budget hotel in city center'
-      },
-      {
-        day: 2,
-        title: 'Main Attractions Tour',
-        activities: ['Guided city tour', 'Famous landmarks visit', 'Cultural site exploration', 'Shopping'],
-        meals: ['Breakfast', 'Lunch at local eatery'],
-        accommodation: 'Same hotel'
-      },
-      {
-        day: 3,
-        title: 'Departure',
-        activities: ['Free morning', 'Last-minute shopping', 'Airport transfer'],
-        meals: ['Breakfast'],
-        accommodation: 'Hotel checkout'
-      }
-    ]
   },
   {
     id: '2',
@@ -107,43 +71,6 @@ const defaultTripPlans: TripPlan[] = [
     rating: 4.6,
     includes: ['3-star accommodation', 'AC transport', 'All meals', '4 guided tours', 'Entry tickets'],
     accommodationType: '3-star hotels with amenities',
-    dailyItinerary: [
-      {
-        day: 1,
-        title: 'Grand Arrival',
-        activities: ['Private airport pickup', 'Hotel check-in', 'Welcome cocktails', 'City lights tour'],
-        meals: ['Welcome dinner with cultural show'],
-        accommodation: '3-star hotel with pool'
-      },
-      {
-        day: 2,
-        title: 'Heritage & Culture',
-        activities: ['Heritage site tours', 'Museum visits', 'Artisan workshops', 'Cultural performances'],
-        meals: ['Breakfast', 'Traditional lunch', 'Dinner at rooftop restaurant'],
-        accommodation: 'Same hotel'
-      },
-      {
-        day: 3,
-        title: 'Adventure Day',
-        activities: ['Adventure activities', 'Nature excursion', 'Local experiences', 'Sunset viewing'],
-        meals: ['Breakfast', 'Picnic lunch', 'BBQ dinner'],
-        accommodation: 'Same hotel'
-      },
-      {
-        day: 4,
-        title: 'Leisure & Shopping',
-        activities: ['Spa session', 'Shopping tours', 'Local cuisine tasting', 'Free time'],
-        meals: ['Breakfast', 'Food court experience', 'Fine dining dinner'],
-        accommodation: 'Same hotel'
-      },
-      {
-        day: 5,
-        title: 'Farewell',
-        activities: ['Late checkout', 'Final sightseeing', 'Souvenir shopping', 'Airport transfer'],
-        meals: ['Breakfast', 'Farewell lunch'],
-        accommodation: 'Hotel checkout'
-      }
-    ]
   },
   {
     id: '3',
@@ -154,87 +81,72 @@ const defaultTripPlans: TripPlan[] = [
     rating: 4.9,
     includes: ['5-star accommodation', 'Premium transport', 'All meals', 'Private guides', 'Exclusive experiences'],
     accommodationType: '5-star luxury resorts',
-    dailyItinerary: [
-      {
-        day: 1,
-        title: 'Royal Welcome',
-        activities: ['Luxury car pickup', 'Presidential suite check-in', 'Champagne welcome', 'Private city overview'],
-        meals: ['Michelin-starred welcome dinner'],
-        accommodation: '5-star luxury resort'
-      },
-      {
-        day: 2,
-        title: 'VIP Heritage Experience',
-        activities: ['Private heritage tours', 'Exclusive monument access', 'Meet local artisans', 'Royal palace visit'],
-        meals: ['Gourmet breakfast', 'Royal lunch', 'Fine dining dinner'],
-        accommodation: 'Luxury suite'
-      },
-      {
-        day: 3,
-        title: 'Exclusive Adventures',
-        activities: ['Private adventure experiences', 'Helicopter tour', 'Exclusive nature reserve', 'Sunset yacht cruise'],
-        meals: ['In-suite breakfast', 'Adventure lunch', 'Yacht dinner'],
-        accommodation: 'Ocean view suite'
-      },
-      {
-        day: 4,
-        title: 'Wellness & Culture',
-        activities: ['Luxury spa treatments', 'Private cooking class', 'Cultural immersion', 'Art gallery tours'],
-        meals: ['Healthy breakfast', 'Cooking class lunch', 'Cultural dinner show'],
-        accommodation: 'Spa suite'
-      },
-      {
-        day: 5,
-        title: 'Hidden Gems',
-        activities: ['Off-beat locations', 'Private photography tour', 'Exclusive local experiences', 'Wine tasting'],
-        meals: ['Continental breakfast', 'Picnic in scenic location', 'Wine pairing dinner'],
-        accommodation: 'Premium suite'
-      },
-      {
-        day: 6,
-        title: 'Ultimate Relaxation',
-        activities: ['Beach/mountain retreat', 'Luxury treatments', 'Personal shopper service', 'Sunset meditation'],
-        meals: ['Room service breakfast', 'Beachside/hillside lunch', 'Candlelight dinner'],
-        accommodation: 'Retreat villa'
-      },
-      {
-        day: 7,
-        title: 'Grand Farewell',
-        activities: ['Late luxury checkout', 'Final exclusive experiences', 'Private shopping', 'Luxury airport transfer'],
-        meals: ['Champagne breakfast', 'Farewell gourmet lunch'],
-        accommodation: 'Departure lounge access'
-      }
-    ]
   }
 ];
+
+const CURRENCY_SYMBOLS = {
+  INR: '₹',
+  USD: '$',
+  EUR: '€',
+  GBP: '£'
+};
 
 export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }: BudgetDurationStepProps) => {
   const [selectedPlan, setSelectedPlan] = useState<TripPlan | null>(initialData?.selectedPlan || null);
   const [customBudget, setCustomBudget] = useState(initialData?.budget?.toString() || '');
   const [date, setDate] = useState<DateRange | undefined>({
     from: initialData?.startDate || new Date(),
-    to: initialData?.endDate || addDays(new Date(), 5),
+    to: initialData?.endDate || addDays(new Date(), initialData?.duration || 5),
   });
   const [currency, setCurrency] = useState(initialData?.currency || 'INR');
   const [isLoading, setIsLoading] = useState(false);
-  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
+
+  const tripDuration = date?.from && date?.to ? differenceInDays(date.to, date.from) + 1 : 0;
+
+  useEffect(() => {
+    if (selectedPlan) {
+      setDate({
+        from: new Date(),
+        to: addDays(new Date(), selectedPlan.duration)
+      });
+      setCustomBudget(selectedPlan.budget.toString());
+    } 
+  }, [selectedPlan]);
 
   const handlePlanSelect = (plan: TripPlan) => {
-    setIsLoading(true);
-    setSelectedPlan(plan);
-    
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    if (selectedPlan?.id === plan.id) {
+      setSelectedPlan(null);
+      setCustomBudget('');
+    } else {
+      setSelectedPlan(plan);
+    }
   };
 
+  const handleCustomBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomBudget(e.target.value);
+    if (selectedPlan) {
+      setSelectedPlan(null);
+    }
+  };
+
+  const handleDateChange = (newDate: DateRange | undefined) => {
+    setDate(newDate);
+    if (selectedPlan) {
+      setSelectedPlan(null);
+    }
+  }
+
   const handleNext = () => {
-    if ((!selectedPlan && (!customBudget || !date?.from || !date?.to))) return;
+    const budget = selectedPlan ? selectedPlan.budget : parseInt(customBudget);
+    const duration = selectedPlan ? selectedPlan.duration : tripDuration;
+    
+    if (!budget || !duration || !date?.from || !date?.to) return;
     
     const data: BudgetDurationData = {
-      budget: selectedPlan ? selectedPlan.budget : parseInt(customBudget),
-      startDate: selectedPlan ? addDays(new Date(), 1) : date.from,
-      endDate: selectedPlan ? addDays(new Date(), selectedPlan.duration) : date.to,
+      budget,
+      duration,
+      startDate: date.from,
+      endDate: date.to,
       currency,
       selectedPlan: selectedPlan || undefined
     };
@@ -242,12 +154,16 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
     onNext(data);
   };
 
+  const renderCurrency = (amount: number) => {
+    return `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] || '₹'}${amount.toLocaleString()}`;
+  }
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Choose Your Perfect Trip</h2>
+        <h2 className="text-3xl font-bold mb-2">Budget & Duration</h2>
         <p className="text-muted-foreground">
-          Select a pre-designed package for {destination} or create your custom experience
+          Select a pre-designed plan for {destination} or customize your trip.
         </p>
       </div>
 
@@ -278,8 +194,8 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
                       {plan.duration} Days
                     </div>
                     <div className="flex items-center gap-1">
-                      <DollarSign className="w-4 h-4" />
-                      ₹{plan.budget.toLocaleString()}
+                      <IndianRupee className="w-4 h-4" />
+                      {renderCurrency(plan.budget)}
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">{plan.description}</p>
@@ -287,7 +203,7 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">Includes:</h4>
+                  <h4 className="font-medium mb-2">What's Included:</h4>
                   <div className="flex flex-wrap gap-1">
                     {plan.includes.slice(0, 3).map((item) => (
                       <Badge key={item} variant="secondary" className="text-xs">{item}</Badge>
@@ -297,31 +213,9 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
                     )}
                   </div>
                 </div>
-
-                <Collapsible 
-                  open={expandedPlan === plan.id} 
-                  onOpenChange={() => setExpandedPlan(expandedPlan === plan.id ? null : plan.id)}
-                >
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-full justify-between p-0 h-auto">
-                      <span className="font-medium">View Daily Itinerary</span>
-                      {expandedPlan === plan.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-3 space-y-3">
-                    {plan.dailyItinerary.map((day) => (
-                      <div key={day.day} className="border rounded-lg p-3 bg-muted/30">
-                        <h5 className="font-medium text-sm">Day {day.day}: {day.title}</h5>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {day.activities.join(' • ')}
-                        </p>
-                      </div>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
                 
                 {selectedPlan?.id === plan.id && (
-                  <Badge className="w-full justify-center bg-success">Selected Plan</Badge>
+                  <Badge variant="default" className="w-full justify-center mt-2 bg-green-500 text-white">Selected</Badge>
                 )}
               </CardContent>
             </Card>
@@ -334,96 +228,88 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            Create Custom Trip
+            Or Customize Your Trip
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="budget">Total Budget</Label>
-              <div className="flex items-center gap-2">
+        <CardContent className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="budget">Your Budget</Label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] || '₹'}
+                </span>
                 <Input
                   id="budget"
                   type="number"
                   placeholder="e.g., 25000"
                   value={customBudget}
-                  onChange={(e) => setCustomBudget(e.target.value)}
-                  className="flex-1"
+                  onChange={handleCustomBudgetChange}
+                  className="pl-8"
                 />
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="INR">INR (₹)</SelectItem>
-                    <SelectItem value="USD">USD ($)</SelectItem>
-                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(CURRENCY_SYMBOLS).map((code) => (
+                    <SelectItem key={code} value={code}>{code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="duration">Trip Dates</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="duration"
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date?.from ? (
-                      date.to ? (
-                        <>
-                          {format(date.from, "LLL dd, y")} -{" "}
-                          {format(date.to, "LLL dd, y")}
-                        </>
-                      ) : (
-                        format(date.from, "LLL dd, y")
-                      )
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="duration">Trip Dates ({tripDuration > 0 ? `${tripDuration} Days` : 'Select dates'})</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="duration"
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format(date.from, "MMM d, yyyy")} - {format(date.to, "MMM d, yyyy")}
+                      </>
                     ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <ShadCalendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                      format(date.from, "MMM d, yyyy")
+                    )
+                  ) : (
+                    <span>Pick your dates</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <ShadCalendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={handleDateChange}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>
 
-      {/* Loading State */}
-      {isLoading && (
+       {/* Loading State */}
+      {isLoading && !selectedPlan && (
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-              <CardTitle>AI is crafting your perfect itinerary...</CardTitle>
+              <CardTitle>Updating your preferences...</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <div className="grid md:grid-cols-3 gap-4">
-              <Skeleton className="h-16" />
-              <Skeleton className="h-16" />
-              <Skeleton className="h-16" />
-            </div>
-          </CardContent>
         </Card>
       )}
 
@@ -434,7 +320,7 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
         </Button>
         <Button 
           onClick={handleNext}
-          disabled={!selectedPlan && (!customBudget || !date?.from || !date?.to)}
+          disabled={!customBudget && !selectedPlan}
           variant="travel"
         >
           Continue to Activities →

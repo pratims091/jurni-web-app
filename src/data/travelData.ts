@@ -6,10 +6,12 @@ export interface City {
   country: string;
   description: string;
   image: string;
-  attractions: string[];
   averageCost: number;
-  bestTimeToVisit: string;
-  popularActivities: string[];
+  bestTimeToVisit?: string;
+  foodSpecialties: string[];
+  culturalHighlights: string[];
+  landmarks: string[];
+  activities: string[];
 }
 
 export interface Duration {
@@ -62,10 +64,12 @@ export const mockCities: City[] = [
     country: "India",
     description: "Beautiful beaches, Portuguese heritage, and vibrant nightlife.",
     image: "/api/placeholder/400/300",
-    attractions: ["Baga Beach", "Old Goa Churches", "Dudhsagar Falls", "Calangute Beach", "Fort Aguada"],
+    landmarks: ["Baga Beach", "Old Goa Churches", "Dudhsagar Falls", "Calangute Beach", "Fort Aguada"],
     averageCost: 60,
     bestTimeToVisit: "November to March",
-    popularActivities: ["Beach activities", "Water sports", "Heritage tours", "Nightlife", "Local cuisine"]
+    activities: ["Beach activities", "Water sports", "Heritage tours", "Nightlife", "Local cuisine"],
+    foodSpecialties: ['Goan Fish Curry', 'Bebinca', 'Feni', 'Pork Vindaloo'],
+    culturalHighlights: ['Portuguese Architecture', 'Carnival Festival', 'Beach Culture', 'Catholic Churches'],
   },
   {
     id: "kerala",
@@ -73,10 +77,12 @@ export const mockCities: City[] = [
     country: "India", 
     description: "God's Own Country with backwaters, hill stations, and spice plantations.",
     image: "/api/placeholder/400/300",
-    attractions: ["Alleppey Backwaters", "Munnar Hills", "Fort Kochi", "Periyar Wildlife Sanctuary", "Kovalam Beach"],
+    landmarks: ["Alleppey Backwaters", "Munnar Hills", "Fort Kochi", "Periyar Wildlife Sanctuary", "Kovalam Beach"],
     averageCost: 50,
     bestTimeToVisit: "October to March",
-    popularActivities: ["Backwater cruises", "Ayurvedic treatments", "Wildlife viewing", "Tea plantation tours", "Cultural shows"]
+    activities: ["Backwater cruises", "Ayurvedic treatments", "Wildlife viewing", "Tea plantation tours", "Cultural shows"],
+    foodSpecialties: ['Appam with Stew', 'Karimeen Fish', 'Puttu', 'Kerala Sadya'],
+    culturalHighlights: ['Kathakali Dance', 'Ayurveda Traditions', 'Coconut Culture', 'Spice Heritage'],
   },
   {
     id: "rajasthan",
@@ -84,10 +90,12 @@ export const mockCities: City[] = [
     country: "India",
     description: "Land of Kings with magnificent palaces, forts, and desert landscapes.",
     image: "/api/placeholder/400/300",
-    attractions: ["Amber Fort", "City Palace Udaipur", "Thar Desert", "Hawa Mahal", "Mehrangarh Fort"],
+    landmarks: ["Amber Fort", "City Palace Udaipur", "Thar Desert", "Hawa Mahal", "Mehrangarh Fort"],
     averageCost: 55,
     bestTimeToVisit: "October to March",
-    popularActivities: ["Palace tours", "Desert safari", "Cultural performances", "Heritage walks", "Camel rides"]
+    activities: ["Palace tours", "Desert safari", "Cultural performances", "Heritage walks", "Camel rides"],
+    foodSpecialties: ['Dal Baati Churma', 'Laal Maas', 'Gatte ki Sabzi', 'Malpua'],
+    culturalHighlights: ['Rajput Heritage', 'Folk Music & Dance', 'Royal Architecture', 'Desert Culture'],
   },
   {
     id: "himachal",
@@ -95,10 +103,12 @@ export const mockCities: City[] = [
     country: "India",
     description: "Mountain paradise with snow-capped peaks, valleys, and adventure activities.",
     image: "/api/placeholder/400/300",
-    attractions: ["Manali", "Shimla", "Dharamshala", "Spiti Valley", "Rohtang Pass"],
+    landmarks: ["Manali", "Shimla", "Dharamshala", "Spiti Valley", "Rohtang Pass"],
     averageCost: 65,
     bestTimeToVisit: "March to June, September to November",
-    popularActivities: ["Trekking", "Paragliding", "Skiing", "Mountain biking", "Nature photography"]
+    activities: ["Trekking", "Paragliding", "Skiing", "Mountain biking", "Nature photography"],
+    foodSpecialties: ['Chana Madra', 'Himachali Trout', 'Siddu', 'Aktori'],
+    culturalHighlights: ['Mountain Culture', 'Buddhist Monasteries', 'Apple Orchards', 'Adventure Sports'],
   },
   {
     id: "uttarakhand",
@@ -106,10 +116,12 @@ export const mockCities: City[] = [
     country: "India",
     description: "Dev Bhoomi with holy rivers, hill stations, and spiritual destinations.",
     image: "/api/placeholder/400/300", 
-    attractions: ["Rishikesh", "Haridwar", "Nainital", "Valley of Flowers", "Kedarnath"],
+    landmarks: ["Rishikesh", "Haridwar", "Nainital", "Valley of Flowers", "Kedarnath"],
     averageCost: 45,
     bestTimeToVisit: "March to June, September to November",
-    popularActivities: ["River rafting", "Yoga retreats", "Pilgrimage tours", "Trekking", "Wildlife viewing"]
+    activities: ["River rafting", "Yoga retreats", "Pilgrimage tours", "Trekking", "Wildlife viewing"],
+    foodSpecialties: ['Aloo ke Gutke', 'Kafuli', 'Bhang Ki Chutney', 'Garhwal ka Fannah'],
+    culturalHighlights: ['Ganga Aarti', 'Char Dham Yatra', 'Kumaoni Holi', 'Nanda Devi Raj Jat'],
   },
   {
     id: "karnataka",
@@ -117,10 +129,12 @@ export const mockCities: City[] = [
     country: "India",
     description: "Rich heritage with palaces, temples, and diverse landscapes from coast to hills.",
     image: "/api/placeholder/400/300",
-    attractions: ["Mysore Palace", "Hampi Ruins", "Coorg Hills", "Bangalore Gardens", "Gokarna Beach"],
+    landmarks: ["Mysore Palace", "Hampi Ruins", "Coorg Hills", "Bangalore Gardens", "Gokarna Beach"],
     averageCost: 50,
     bestTimeToVisit: "October to March",
-    popularActivities: ["Palace tours", "Historical exploration", "Coffee plantation visits", "Beach relaxation", "City tours"]
+    activities: ["Palace tours", "Historical exploration", "Coffee plantation visits", "Beach relaxation", "City tours"],
+    foodSpecialties: ['Bisi Bele Bath', 'Mysore Pak', 'Dosa', 'Ragi Mudde'],
+    culturalHighlights: ['Mysuru Dasara', 'Hampi Utsav', 'Yakshagana', 'Kodava Culture'],
   }
 ];
 

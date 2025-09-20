@@ -1,16 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { LocationSearchStep } from './LocationSearchStep';
 import { BudgetDurationStep } from './BudgetDurationStep';
 import { ActivitiesSelectionStep } from './ActivitiesSelectionStep';
 import { DayWiseActivityPlanner } from './DayWiseActivityPlanner';
 import { EnhancedHotelsStep } from './EnhancedHotelsStep';
-import { EnhancedFlightsStep } from './EnhancedFlightsStep';
+import { FlightsStep } from './FlightsStep';
 import { SignupLoginStep } from './SignupLoginStep';
-import { TripMembersStep } from './TripMembersStep';
 import { FinalItinerary } from './FinalItinerary';
 
-type Step = 'location' | 'budget-duration' | 'activities' | 'day-planner' | 'hotels' | 'flights' | 'summary' | 'auth' | 'members' | 'saved';
+type Step = 'location' | 'budget-duration' | 'activities' | 'day-planner' | 'hotels' | 'flights' | 'summary' | 'auth';
 
 interface TripData {
   locationInfo?: any;
@@ -20,23 +20,16 @@ interface TripData {
   hotelsData?: any;
   flightsData?: any;
   authData?: any;
-  membersData?: any;
 }
 
 export const EnhancedTravelBookingFlow = () => {
   const [currentStep, setCurrentStep] = useState<Step>('location');
   const [tripData, setTripData] = useState<TripData>({});
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const steps: Step[] = ['location', 'budget-duration', 'activities', 'day-planner', 'hotels', 'flights', 'summary', 'auth', 'members', 'saved'];
+  const steps: Step[] = ['location', 'budget-duration', 'activities', 'day-planner', 'hotels', 'flights', 'summary', 'auth'];
   const currentStepIndex = steps.indexOf(currentStep);
-
-  const goToNextStep = () => {
-    const nextIndex = currentStepIndex + 1;
-    if (nextIndex < steps.length) {
-      setCurrentStep(steps[nextIndex]);
-    }
-  };
 
   const goToPreviousStep = () => {
     const prevIndex = currentStepIndex - 1;
@@ -80,24 +73,27 @@ export const EnhancedTravelBookingFlow = () => {
   };
 
   const handleSummaryNext = () => {
-    setCurrentStep('auth');
+    const currentUser = localStorage.getItem('travel_current_user');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      handleAuthNext({ user: userData, isAuthenticated: true });
+    } else {
+      setCurrentStep('auth');
+    }
   };
 
   const handleAuthNext = (data: any) => {
-    setTripData({ ...tripData, authData: data });
-    setCurrentStep('members');
-  };
+    const updatedTripData = { ...tripData, authData: data };
+    setTripData(updatedTripData);
 
-  const handleMembersNext = (data: any) => {
-    setTripData({ ...tripData, membersData: data });
-    
     const completeTrip = {
       id: Date.now().toString(),
-      ...tripData,
-      membersData: data,
-      dayPlansData: tripData.dayPlansData,
+      ...updatedTripData,
       createdAt: new Date().toISOString(),
-      userEmail: tripData.authData?.user?.email
+      userEmail: data?.user?.email,
+      location: updatedTripData.locationInfo?.destination,
+      duration: updatedTripData.budgetDurationData?.duration,
+      budget: updatedTripData.budgetDurationData?.budget,
     };
 
     const existingTrips = JSON.parse(localStorage.getItem('saved_trips') || '[]');
@@ -109,18 +105,17 @@ export const EnhancedTravelBookingFlow = () => {
       description: "Your perfect trip has been saved to My Trips.",
     });
 
-    setCurrentStep('saved');
+    navigate('/dashboard');
   };
 
   const renderCurrentStep = () => {
+    const initialBudget = tripData.budgetDurationData?.budget || 0;
+    const activitiesCost = tripData.dayPlansData?.totalCost || 0;
+    const hotelCost = tripData.hotelsData?.totalCost || 0;
+
     switch (currentStep) {
       case 'location':
-        return (
-          <LocationSearchStep
-            onNext={handleLocationNext}
-            initialData={tripData.locationInfo}
-          />
-        );
+        return <LocationSearchStep onNext={handleLocationNext} initialData={tripData.locationInfo} />;
       
       case 'budget-duration':
         return (
@@ -132,13 +127,13 @@ export const EnhancedTravelBookingFlow = () => {
           />
         );
         
-        case 'activities':
+      case 'activities':
         return (
           <ActivitiesSelectionStep
             onNext={handleActivitiesNext}
             onBack={goToPreviousStep}
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
-            budget={tripData.budgetDurationData?.budget || 50000}
+            budget={initialBudget}
             duration={tripData.budgetDurationData?.duration || 5}
             isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible}
           />
@@ -161,17 +156,25 @@ export const EnhancedTravelBookingFlow = () => {
             onNext={handleHotelsNext}
             onBack={goToPreviousStep}
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
-            budget={tripData.budgetDurationData?.budget || 50000}
+            budget={initialBudget}
+            spent={activitiesCost}
             duration={tripData.budgetDurationData?.duration || 5}
             travelers={tripData.locationInfo?.travelers.length || 2}
+            isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible}
           />
         );
         
       case 'flights':
         return (
-          <EnhancedFlightsStep
-            onNext={handleFlightsNext}
+          <FlightsStep
+            onNext={(selectedFlight, skipFlight) => handleFlightsNext({ selectedFlight, skipFlight, totalCost: selectedFlight ? selectedFlight.price * (tripData.locationInfo?.travelers.length || 1) : 0 })}
             onBack={goToPreviousStep}
+            departure={"Your Location"}
+            destination={tripData.locationInfo?.destination || 'Selected Destination'}
+            travelers={tripData.locationInfo?.travelers.length || 1}
+            budget={initialBudget}
+            spent={activitiesCost + hotelCost}
+            isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible}
           />
         );
         
@@ -193,42 +196,7 @@ export const EnhancedTravelBookingFlow = () => {
         );
         
       case 'auth':
-        return (
-          <SignupLoginStep
-            onNext={handleAuthNext}
-            onBack={goToPreviousStep}
-          />
-        );
-        
-      case 'members':
-        return (
-          <TripMembersStep
-            onNext={handleMembersNext}
-            onBack={goToPreviousStep}
-            totalTravelers={tripData.locationInfo?.travelers.length || 2}
-            userEmail={tripData.authData?.user?.email || ''}
-            userName={tripData.authData?.user?.name || ''}
-          />
-        );
-        
-      case 'saved':
-        return (
-          <div className="text-center space-y-6 max-w-2xl mx-auto">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold">Trip Saved Successfully!</h2>
-            <p className="text-muted-foreground">Your perfect trip has been saved and you can access it anytime from My Trips.</p>
-            <button 
-              onClick={() => setCurrentStep('location')} 
-              className="btn btn-primary"
-            >
-              Plan Another Trip
-            </button>
-          </div>
-        );
+        return <SignupLoginStep onNext={handleAuthNext} onBack={goToPreviousStep} />;
         
       default:
         return <div>Unknown step</div>;
