@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { DollarSign, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, IndianRupee } from 'lucide-react';
 
 interface BudgetTrackerProps {
   totalBudget: number;
@@ -14,7 +14,7 @@ export const BudgetTracker = ({ totalBudget, spent, isFlexible }: BudgetTrackerP
       <Card className="mb-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
         <CardContent className="pt-4">
           <div className="flex items-center gap-3">
-            <DollarSign className="w-5 h-5 text-primary" />
+            <IndianRupee className="w-5 h-5 text-primary" />
             <div>
               <h3 className="font-semibold text-primary">Flexible Budget</h3>
               <p className="text-sm text-muted-foreground">We'll suggest the best options for you</p>
@@ -26,7 +26,7 @@ export const BudgetTracker = ({ totalBudget, spent, isFlexible }: BudgetTrackerP
   }
 
   const remaining = totalBudget - spent;
-  const spentPercentage = Math.min((spent / totalBudget) * 100, 100);
+  const spentPercentage = totalBudget > 0 ? Math.min((spent / totalBudget) * 100, 100) : 0;
   const isOverBudget = spent > totalBudget;
   const isNearLimit = spentPercentage > 80 && !isOverBudget;
 
@@ -36,18 +36,18 @@ export const BudgetTracker = ({ totalBudget, spent, isFlexible }: BudgetTrackerP
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <DollarSign className={`w-5 h-5 ${isOverBudget ? 'text-destructive' : isNearLimit ? 'text-warning' : 'text-success'}`} />
+              <IndianRupee className={`w-5 h-5 ${isOverBudget ? 'text-destructive' : isNearLimit ? 'text-warning' : 'text-success'}`} />
               <h3 className="font-semibold">Budget Tracker</h3>
               {isOverBudget && <AlertTriangle className="w-4 h-4 text-destructive" />}
             </div>
             <div className="text-right">
               <div className="text-lg font-bold">
-                ${spent.toFixed(0)} / ${totalBudget.toFixed(0)}
+                ₹{spent.toLocaleString()} / ₹{totalBudget.toLocaleString()}
               </div>
               <div className={`text-sm ${isOverBudget ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
                 {isOverBudget 
-                  ? `Over budget by $${Math.abs(remaining).toFixed(0)}` 
-                  : `$${remaining.toFixed(0)} remaining`
+                  ? `Over budget by ₹${Math.abs(remaining).toLocaleString()}` 
+                  : `₹${remaining.toLocaleString()} remaining`
                 }
               </div>
             </div>
@@ -59,9 +59,9 @@ export const BudgetTracker = ({ totalBudget, spent, isFlexible }: BudgetTrackerP
               className={`h-3 ${isOverBudget ? '[&>div]:bg-destructive' : isNearLimit ? '[&>div]:bg-warning' : '[&>div]:bg-success'}`}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>$0</span>
+              <span>₹0</span>
               <span>{spentPercentage.toFixed(0)}% used</span>
-              <span>${totalBudget.toFixed(0)}</span>
+              <span>₹{totalBudget.toLocaleString()}</span>
             </div>
           </div>
 

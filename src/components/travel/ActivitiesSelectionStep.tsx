@@ -8,7 +8,7 @@ import { BudgetTracker } from './BudgetTracker';
 import { 
   MapPin, 
   Clock, 
-  DollarSign, 
+  IndianRupee, 
   Star, 
   Camera, 
   Mountain, 
@@ -467,8 +467,8 @@ export const ActivitiesSelectionStep = ({ onNext, onBack, destination, budget, d
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 font-semibold text-primary">
-                      <DollarSign className="w-4 h-4" />
-                      ₹{activity.cost.toLocaleString()}
+                      <IndianRupee className="w-4 h-4" />
+                      {activity.cost.toLocaleString()}
                     </div>
                     {activity.included && (
                       <Badge variant="secondary" className="text-xs">Included</Badge>

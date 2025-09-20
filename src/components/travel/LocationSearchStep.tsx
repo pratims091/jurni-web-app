@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface Traveler {
   name: string;
-  age: number;
+  age?: number;
   gender: 'male' | 'female' | 'other';
 }
 
@@ -93,7 +93,7 @@ const indianCities = [
 export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepProps) => {
   const [searchTerm, setSearchTerm] = useState(initialData?.destination || '');
   const [departureCity, setDepartureCity] = useState(initialData?.departureCity || 'Jaipur');
-  const [travelers, setTravelers] = useState<Traveler[]>(initialData?.travelers || [{ name: '', age: 30, gender: 'male' }]);
+  const [travelers, setTravelers] = useState<Traveler[]>(initialData?.travelers || [{ name: '', gender: 'male' }]);
   const [selectedDestination, setSelectedDestination] = useState<City | null>(initialData?.selectedCity || null);
   const [showDestinationDetails, setShowDestinationDetails] = useState(!!initialData?.selectedCity);
   const [isLoading, setIsLoading] = useState(false);
@@ -134,7 +134,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
   };
 
   const addTraveler = () => {
-    setTravelers([...travelers, { name: '', age: 30, gender: 'male' }]);
+    setTravelers([...travelers, { name: '', gender: 'male' }]);
   };
 
   const removeTraveler = (index: number) => {
@@ -207,16 +207,16 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 {travelers.map((traveler, index) => (
                   <div key={index} className="grid grid-cols-4 gap-2 items-center">
                     <Input 
-                      placeholder="Name" 
-                      value={traveler.name}
+                      placeholder="Name"
+                      value={traveler.name} 
                       onChange={(e) => handleTravelerChange(index, 'name', e.target.value)}
                       className="col-span-2"
                     />
                     <Input 
                       type="number" 
-                      placeholder="Age" 
+                      placeholder="Age"
                       value={traveler.age}
-                      onChange={(e) => handleTravelerChange(index, 'age', parseInt(e.target.value) || 0)}
+                      onChange={(e) => handleTravelerChange(index, 'age', parseInt(e.target.value) || undefined)}
                     />
                     <div className="flex items-center">
                       <Select 
@@ -273,7 +273,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                   </p>
                    <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-muted-foreground">From</span>
-                    <span className="font-semibold text-primary">₹{(destination.averageCost * 75).toLocaleString()}/day</span>
+                    <span className="font-semibold text-primary">₹{(destination.averageCost * 83).toLocaleString()}/day</span>
                   </div>
                 </CardContent>
               </Card>

@@ -5,7 +5,6 @@ import { Separator } from '@/components/ui/separator';
 import { 
   MapPin, 
   Calendar, 
-  DollarSign, 
   Users, 
   Plane, 
   Hotel, 
@@ -13,9 +12,10 @@ import {
   CheckCircle,
   AlertTriangle,
   Download,
-  Share
+  Share,
+  IndianRupee
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -47,8 +47,16 @@ interface Flight {
   id: string;
   airline: string;
   price: number;
-  departure: string;
-  arrival: string;
+  departure: {
+    time: string;
+    airport: string;
+    city: string;
+  };
+  arrival: {
+    time: string;
+    airport: string;
+    city: string;
+  };
 }
 
 interface TripMember {
@@ -97,10 +105,10 @@ export const FinalItinerary = ({
   const activitiesTotalCost = activitiesData?.totalCost || 0;
 
   const duration = startDate && endDate 
-    ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    ? differenceInCalendarDays(endDate, startDate) + 1
     : 1;
 
-  const hotelCost = selectedHotel ? selectedHotel.price * duration : 0;
+  const hotelCost = selectedHotel ? selectedHotel.price * (duration - 1) : 0;
   const flightCost = selectedFlight ? selectedFlight.price : 0;
   const finalCost = activitiesTotalCost + hotelCost + flightCost;
   const isOverBudget = finalCost > budget;
@@ -180,7 +188,7 @@ export const FinalItinerary = ({
 
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <DollarSign className="w-4 h-4" />
+                <IndianRupee className="w-4 h-4" />
                 Budget Status
               </div>
               <div className="font-semibold">
@@ -192,7 +200,7 @@ export const FinalItinerary = ({
                       Over Budget
                     </Badge>
                   ) : (
-                    <Badge variant="default" className="text-xs bg-success text-success-foreground">
+                    <Badge variant="default" className="text-xs bg-green-500 text-white">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Within Budget
                     </Badge>
@@ -209,7 +217,7 @@ export const FinalItinerary = ({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5" />
+              <IndianRupee className="w-5 h-5" />
               Budget Breakdown
             </CardTitle>
           </CardHeader>
@@ -227,7 +235,7 @@ export const FinalItinerary = ({
               
               {selectedHotel && (
                 <div className="flex justify-between items-center">
-                  <span>Hotel ({duration} nights):</span>
+                  <span>Hotel ({duration - 1} nights):</span>
                   <span>₹{hotelCost.toLocaleString()}</span>
                 </div>
               )}
@@ -242,7 +250,7 @@ export const FinalItinerary = ({
               <Separator />
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>Total Cost:</span>
-                <span className={isOverBudget ? 'text-destructive' : 'text-success'}>
+                <span className={isOverBudget ? 'text-destructive' : 'text-green-500'}>
                   ₹{finalCost.toLocaleString()}
                 </span>
               </div>
@@ -349,13 +357,13 @@ export const FinalItinerary = ({
                 <div className="flex items-center gap-2">
                   <div className="flex">
                     {Array.from({ length: selectedHotel.rating }).map((_, i) => (
-                      <span key={i} className="text-warning">★</span>
+                      <span key={i} className="text-yellow-400">★</span>
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground">({selectedHotel.rating} stars)</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm">Total ({duration} nights):</span>
+                  <span className="text-sm">Total ({duration - 1} nights):</span>
                   <span className="font-semibold">₹{hotelCost.toLocaleString()}</span>
                 </div>
               </div>
@@ -377,11 +385,11 @@ export const FinalItinerary = ({
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Departure:</span>
-                    <span>{selectedFlight.departure}</span>
+                    <span>{`${selectedFlight.departure.time} (${selectedFlight.departure.airport})`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Arrival:</span>
-                    <span>{selectedFlight.arrival}</span>
+                    <span>{`${selectedFlight.arrival.time} (${selectedFlight.arrival.airport})`}</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t">

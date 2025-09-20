@@ -3,18 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BudgetTracker } from './BudgetTracker';
 import { 
   Plane, 
   Clock, 
-  DollarSign,
-  Calendar,
-  MapPin,
   Users,
   Luggage,
   Wifi,
   Coffee,
   Tv,
-  ChevronRight,
   ArrowRight
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -56,58 +53,62 @@ interface FlightsStepProps {
   departure: string;
   destination: string;
   travelers: number;
+  budget: number;
+  spent: number;
+  isFlexibleBudget?: boolean;
 }
 
 const availableFlights: Flight[] = [
   {
     id: '1',
-    airline: 'IndiGo',
-    flightNumber: '6E 439',
+    airline: 'SkyBlue Airways',
+    flightNumber: 'SB-2341',
     aircraft: 'Airbus A320',
-    price: 8500,
-    originalPrice: 12000,
+    price: 12000,
     departure: {
-      time: '06:30',
+      time: '14:30',
       airport: 'DEL',
       city: 'Delhi'
     },
     arrival: {
-      time: '08:45',
+      time: '16:45',
       airport: 'GOI',
       city: 'Goa'
     },
     duration: '2h 15m',
     stops: 0,
-    baggage: '15kg + 7kg cabin',
-    seatType: 'Economy',
-    amenities: ['Seat Selection', 'Meals Available', 'Entertainment'],
+    baggage: '15kg checked + 7kg cabin',
+    seatType: 'economy',
+    amenities: ['Meal', 'Entertainment'],
     cancellation: 'Free up to 24h',
-    meal: false,
+    meal: true,
     popular: true,
-    deal: true,
+    deal: false,
     onTimePerformance: 92
   },
   {
     id: '2',
-    airline: 'Air India',
-    flightNumber: 'AI 635',
+    airline: 'Budget Wings',
+    flightNumber: 'BW-5432',
     aircraft: 'Boeing 737',
-    price: 7200,
+    price: 8500,
     departure: {
-      time: '14:20',
+      time: '08:15',
       airport: 'DEL',
       city: 'Delhi'
     },
     arrival: {
-      time: '16:50',
+      time: '13:45',
       airport: 'GOI',
       city: 'Goa'
     },
-    duration: '2h 30m',
-    stops: 0,
-    baggage: '20kg + 8kg cabin',
-    seatType: 'Economy',
-    amenities: ['Complimentary Meal', 'Entertainment', 'WiFi'],
+    duration: '4h 30m',
+    stops: 1,
+    stopDetails: ['Mumbai'],
+    layoverTime: '1h 20m',
+    baggage: '15kg checked + 7kg cabin',
+    seatType: 'economy',
+    amenities: ['Snacks'],
     cancellation: 'Charges apply',
     meal: true,
     popular: false,
@@ -116,123 +117,55 @@ const availableFlights: Flight[] = [
   },
   {
     id: '3',
-    airline: 'SpiceJet',
-    flightNumber: 'SG 8157',
-    aircraft: 'Boeing 737 MAX',
-    price: 6800,
-    departure: {
-      time: '10:15',
-      airport: 'DEL',
-      city: 'Delhi'
-    },
-    arrival: {
-      time: '14:30',
-      airport: 'GOI',
-      city: 'Goa'
-    },
-    duration: '4h 15m',
-    stops: 1,
-    stopDetails: ['Mumbai (BOM)'],
-    layoverTime: '1h 30m',
-    baggage: '15kg + 7kg cabin',
-    seatType: 'Economy',
-    amenities: ['Seat Selection', 'Snacks Available'],
-    cancellation: 'Non-refundable',
-    meal: false,
-    popular: false,
-    deal: false,
-    onTimePerformance: 85
-  },
-  {
-    id: '4',
-    airline: 'Vistara',
-    flightNumber: 'UK 995',
+    airline: 'QuickJet',
+    flightNumber: 'QJ-7890',
     aircraft: 'Airbus A320neo',
     price: 15500,
     departure: {
-      time: '19:30',
+      time: '19:20',
       airport: 'DEL',
       city: 'Delhi'
     },
     arrival: {
-      time: '22:00',
+      time: '22:05',
       airport: 'GOI',
       city: 'Goa'
     },
-    duration: '2h 30m',
+    duration: '2h 45m',
     stops: 0,
-    baggage: '25kg + 8kg cabin',
-    seatType: 'Premium Economy',
-    amenities: ['Premium Meal', 'Extra Legroom', 'Priority Boarding', 'WiFi', 'Entertainment'],
+    baggage: '20kg checked + 8kg cabin',
+    seatType: 'economy',
+    amenities: ['Meal', 'WiFi', 'Entertainment'],
     cancellation: 'Free up to 2h',
     meal: true,
     popular: true,
     deal: false,
     onTimePerformance: 94
-  },
-  {
-    id: '5',
-    airline: 'GoAir',
-    flightNumber: 'G8 319',
-    aircraft: 'Airbus A320',
-    price: 5900,
-    departure: {
-      time: '22:45',
-      airport: 'DEL',
-      city: 'Delhi'
-    },
-    arrival: {
-      time: '01:15+1',
-      airport: 'GOI',
-      city: 'Goa'
-    },
-    duration: '2h 30m',
-    stops: 0,
-    baggage: '15kg + 7kg cabin',
-    seatType: 'Economy',
-    amenities: ['Seat Selection'],
-    cancellation: 'Charges apply',
-    meal: false,
-    popular: false,
-    deal: true,
-    onTimePerformance: 82
   }
 ];
 
-const amenityIcons = {
-  'Complimentary Meal': Coffee,
-  'Premium Meal': Coffee,
-  'Meals Available': Coffee,
-  'Entertainment': Tv,
-  'WiFi': Wifi,
-  'Seat Selection': Users,
-  'Extra Legroom': Users,
-  'Priority Boarding': Luggage,
-  'Snacks Available': Coffee
+const amenityIcons: { [key: string]: React.ElementType } = {
+  Meal: Coffee,
+  Entertainment: Tv,
+  WiFi: Wifi,
+  Snacks: Coffee,
 };
 
-export const FlightsStep = ({ onNext, onBack, departure, destination, travelers }: FlightsStepProps) => {
+export const FlightsStep = ({ onNext, onBack, departure, destination, travelers, budget, spent = 0, isFlexibleBudget = false }: FlightsStepProps) => {
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [sortBy, setSortBy] = useState('recommended');
   const [isLoading, setIsLoading] = useState(false);
+
+  const flightCost = selectedFlight ? selectedFlight.price * travelers : 0;
+  const totalSpent = spent + flightCost;
 
   const handleFlightSelect = (flight: Flight) => {
     setIsLoading(true);
     setSelectedFlight(flight);
     
-    // Simulate AI processing
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-  };
-
-  const handleSkipFlight = () => {
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      setIsLoading(false);
-      onNext(null, true);
-    }, 500);
   };
 
   const handleNext = () => {
@@ -247,25 +180,12 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers 
       case 'duration': return parseInt(a.duration) - parseInt(b.duration);
       case 'departure': return a.departure.time.localeCompare(b.departure.time);
       case 'arrival': return a.arrival.time.localeCompare(b.arrival.time);
-      default: return (b.popular ? 1 : 0) - (a.popular ? 1 : 0); // recommended
+      default: return (b.popular ? 1 : 0) - (a.popular ? 1 : 0);
     }
   });
 
-  const formatTime = (timeString: string) => {
-    if (timeString.includes('+1')) {
-      return timeString.replace('+1', '') + ' (+1 day)';
-    }
-    return timeString;
-  };
-
-  const getPerformanceColor = (performance: number) => {
-    if (performance >= 90) return 'text-success';
-    if (performance >= 80) return 'text-warning';
-    return 'text-destructive';
-  };
-
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-2">Choose Your Flight</h2>
         <p className="text-muted-foreground">
@@ -273,20 +193,12 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers 
         </p>
       </div>
 
-      {/* Skip Option */}
-      <Card className="max-w-2xl mx-auto border-dashed">
-        <CardContent className="flex items-center justify-between p-6">
-          <div>
-            <h3 className="font-semibold">Have your own transport?</h3>
-            <p className="text-sm text-muted-foreground">Skip flight booking and arrange your own travel</p>
-          </div>
-          <Button onClick={handleSkipFlight} variant="outline">
-            Skip Flights
-          </Button>
-        </CardContent>
-      </Card>
+      <BudgetTracker 
+        totalBudget={budget}
+        spent={totalSpent}
+        isFlexible={isFlexibleBudget}
+      />
 
-      {/* Sort Options */}
       <div className="flex items-center justify-between">
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-48">
@@ -307,137 +219,80 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers 
         </div>
       </div>
 
-      {/* Flights List */}
       <div className="space-y-4">
         {sortedFlights.map((flight) => (
           <Card 
             key={flight.id}
-            className={`cursor-pointer transition-smooth hover:shadow-elevation ${
-              selectedFlight?.id === flight.id ? 'ring-2 ring-primary' : ''
+            className={`cursor-pointer transition-all hover:shadow-lg ${
+              selectedFlight?.id === flight.id ? 'ring-2 ring-primary shadow-lg' : 'shadow-md'
             }`}
             onClick={() => handleFlightSelect(flight)}
           >
             <CardContent className="p-6">
-              <div className="space-y-4">
-                {/* Header with airline and badges */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-ocean rounded-lg flex items-center justify-center">
-                      <Plane className="w-6 h-6 text-white" />
-                    </div>
+              <div className="grid grid-cols-12 gap-4 items-center">
+
+                <div className="col-span-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Plane className="w-5 h-5 text-muted-foreground" />
                     <div>
-                      <h3 className="font-semibold text-lg">{flight.airline}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>{flight.flightNumber}</span>
-                        <span>•</span>
-                        <span>{flight.aircraft}</span>
-                      </div>
+                      <div className="font-bold">{flight.airline}</div>
+                      <div className="text-xs text-muted-foreground">{flight.flightNumber}</div>
                     </div>
                   </div>
-                  
-                  <div className="flex gap-2">
-                    {flight.deal && <Badge className="bg-destructive">Deal</Badge>}
-                    {flight.popular && <Badge className="bg-success">Popular</Badge>}
-                  </div>
+                  <Badge variant="outline" className="capitalize bg-blue-100 text-blue-800 border-blue-200">
+                    {flight.seatType}
+                  </Badge>
                 </div>
 
-                {/* Flight Details */}
-                <div className="grid lg:grid-cols-4 gap-6 items-center">
-                  {/* Departure */}
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{flight.departure.time}</div>
-                    <div className="text-sm text-muted-foreground">{flight.departure.airport}</div>
-                    <div className="text-sm font-medium">{flight.departure.city}</div>
-                  </div>
-
-                  {/* Duration and Route */}
-                  <div className="text-center relative">
-                    <div className="flex items-center justify-center">
-                      <div className="flex-1 h-0.5 bg-border"></div>
-                      <div className="mx-2">
-                        <Plane className="w-4 h-4 text-primary rotate-90" />
-                      </div>
-                      <div className="flex-1 h-0.5 bg-border"></div>
-                    </div>
-                    <div className="text-sm font-medium mt-2">{flight.duration}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {flight.stops === 0 ? 'Direct' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
-                    </div>
-                    {flight.stopDetails && (
-                      <div className="text-xs text-muted-foreground">
-                        via {flight.stopDetails.join(', ')}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Arrival */}
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{formatTime(flight.arrival.time)}</div>
-                    <div className="text-sm text-muted-foreground">{flight.arrival.airport}</div>
-                    <div className="text-sm font-medium">{flight.arrival.city}</div>
-                  </div>
-
-                  {/* Price and Book */}
-                  <div className="text-center">
-                    {flight.originalPrice && (
-                      <div className="text-sm text-muted-foreground line-through">
-                        ₹{(flight.originalPrice * travelers).toLocaleString()}
-                      </div>
-                    )}
-                    <div className="text-2xl font-bold text-primary">
-                      ₹{(flight.price * travelers).toLocaleString()}
-                    </div>
-                    <div className="text-xs text-muted-foreground">for {travelers} traveler{travelers > 1 ? 's' : ''}</div>
-                    {selectedFlight?.id === flight.id && (
-                      <Badge className="bg-success mt-2">Selected</Badge>
-                    )}
-                  </div>
+                <div className="col-span-3 text-center">
+                  <div className="text-xl font-bold">{flight.departure.time}</div>
+                  <div className="text-sm text-muted-foreground">{flight.departure.airport}</div>
                 </div>
 
-                {/* Additional Details */}
-                <div className="border-t pt-4 space-y-3">
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Baggage:</span>
-                      <div className="font-medium">{flight.baggage}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Seat Type:</span>
-                      <div className="font-medium">{flight.seatType}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Cancellation:</span>
-                      <div className="font-medium">{flight.cancellation}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">On-time:</span>
-                      <div className={`font-medium ${getPerformanceColor(flight.onTimePerformance)}`}>
-                        {flight.onTimePerformance}%
-                      </div>
-                    </div>
+                <div className="col-span-2 text-center">
+                  <div className="text-sm text-muted-foreground">{flight.duration}</div>
+                  <div className="flex items-center justify-center">
+                    <div className="flex-grow border-t border-dashed"></div>
+                    <ArrowRight className="w-4 h-4 mx-2 text-muted-foreground" />
+                    <div className="flex-grow border-t border-dashed"></div>
                   </div>
+                  {flight.stops > 0 && (
+                    <div className="text-xs text-red-500">{flight.stops} stop(s)</div>
+                  )}
+                  {flight.layoverTime && (
+                     <div className="text-xs text-muted-foreground">Layover in {flight.layoverTime}</div>
+                  )}
+                </div>
 
-                  {/* Amenities */}
-                  <div>
-                    <span className="text-sm text-muted-foreground">Amenities:</span>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {flight.amenities.map((amenity) => {
-                        const IconComponent = amenityIcons[amenity] || Plane;
+                <div className="col-span-2 text-center">
+                  <div className="text-xl font-bold">{flight.arrival.time}</div>
+                  <div className="text-sm text-muted-foreground">{flight.arrival.airport}</div>
+                </div>
+                
+                <div className="col-span-2 text-right">
+                    <div className="text-xl font-bold text-primary">₹{flight.price.toLocaleString()}</div>
+                    <div className="text-xs text-muted-foreground">per person</div>
+                </div>
+              </div>
+
+              <div className="border-t mt-4 pt-4 flex justify-between items-center">
+                <div className="col-span-6 space-y-2">
+                    <div className="text-sm font-semibold">Includes</div>
+                     <div className="flex items-center gap-4 text-sm">
+                       {flight.amenities.map((amenity) => {
+                        const Icon = amenityIcons[amenity];
                         return (
-                          <div key={amenity} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
-                            <IconComponent className="w-3 h-3" />
-                            {amenity}
-                          </div>
+                          <Badge key={amenity} variant='outline' className='bg-gray-100'>
+                            {Icon && <Icon className="w-3 h-3 mr-1.5" />} {amenity}
+                          </Badge>
                         );
                       })}
-                      {flight.meal && (
-                        <div className="flex items-center gap-1 text-xs bg-success/20 text-success px-2 py-1 rounded">
-                          <Coffee className="w-3 h-3" />
-                          Meal Included
-                        </div>
-                      )}
                     </div>
+                    <div className="text-sm text-muted-foreground">Baggage: {flight.baggage}</div>
                   </div>
+                <div className="col-span-6 text-right">
+                   <div className="text-sm text-muted-foreground">Aircraft: {flight.aircraft}</div>
+                   <div className="font-semibold">Total for {travelers} travelers: ₹{(flight.price * travelers).toLocaleString()}</div>
                 </div>
               </div>
             </CardContent>
@@ -445,7 +300,6 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers 
         ))}
       </div>
 
-      {/* Loading State */}
       {isLoading && (
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
@@ -466,7 +320,6 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers 
         </Card>
       )}
 
-      {/* Navigation */}
       <div className="flex justify-between max-w-4xl mx-auto">
         <Button onClick={onBack} variant="outline">
           ← Back to Hotels

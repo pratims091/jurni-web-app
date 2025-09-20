@@ -6,7 +6,7 @@ import {
   MapPin, 
   Calendar, 
   Users, 
-  DollarSign,
+  IndianRupee,
   Trash2,
   Eye,
   Download
@@ -72,7 +72,7 @@ export const MyTripsPage = () => {
                   {trip.membersData?.totalMembers || trip.locationInfo?.numberOfTravelers || 2} travelers
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <DollarSign className="w-4 h-4" />
+                  <IndianRupee className="w-4 h-4" />
                   ₹{trip.budgetDurationData?.budget?.toLocaleString() || '50,000'}
                 </div>
               </div>

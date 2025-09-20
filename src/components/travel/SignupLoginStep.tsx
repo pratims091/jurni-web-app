@@ -68,6 +68,11 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
     setErrors({});
   };
 
+  const handleTabChange = (value: 'login' | 'signup') => {
+    setActiveTab(value);
+    clearErrors();
+  };
+
   const handleLogin = async () => {
     clearErrors();
     const newErrors: ValidationErrors = {};
@@ -88,41 +93,44 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
 
     // Simulate API call
     setTimeout(() => {
-      // Check if user exists in localStorage
       const existingUsers = JSON.parse(localStorage.getItem('travel_users') || '[]');
-      const user = existingUsers.find((u: any) => 
-        u.email === loginEmail && u.password === loginPassword
-      );
+      const userByEmail = existingUsers.find((u: any) => u.email === loginEmail);
 
-      if (user) {
-        // Store current session
+      if (!userByEmail) {
+        setErrors({ email: 'User not found. Please create an account.' });
+        toast({
+          title: "Login Failed",
+          description: "User not found. Please create an account.",
+          variant: "destructive"
+        });
+      } else if (userByEmail.password !== loginPassword) {
+        setErrors({ password: 'Invalid password. Please try again.' });
+        toast({
+          title: "Login Failed",
+          description: "Invalid password. Please try again.",
+          variant: "destructive"
+        });
+      } else {
         localStorage.setItem('travel_current_user', JSON.stringify({
-          email: user.email,
-          name: user.name
+          email: userByEmail.email,
+          name: userByEmail.name
         }));
 
         toast({
           title: "Welcome back!",
-          description: `Logged in successfully as ${user.name || user.email}`,
+          description: `Logged in successfully as ${userByEmail.name || userByEmail.email}`,
         });
 
         const authData: AuthData = {
           isAuthenticated: true,
           user: {
-            email: user.email,
-            name: user.name
+            email: userByEmail.email,
+            name: userByEmail.name
           },
           isNewUser: false
         };
 
         onNext(authData);
-      } else {
-        setErrors({ password: 'Invalid email or password' });
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive"
-        });
       }
       setIsLoading(false);
     }, 1500);
@@ -151,12 +159,11 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
 
     // Simulate API call
     setTimeout(() => {
-      // Check if user already exists
       const existingUsers = JSON.parse(localStorage.getItem('travel_users') || '[]');
       const existingUser = existingUsers.find((u: any) => u.email === signupEmail);
 
       if (existingUser) {
-        setErrors({ email: 'An account with this email already exists' });
+        setErrors({ email: 'An account with this email already exists. Please login instead.' });
         toast({
           title: "Signup Failed", 
           description: "An account with this email already exists. Please login instead.",
@@ -166,7 +173,6 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
         return;
       }
 
-      // Create new user
       const newUser = {
         name: signupName,
         email: signupEmail,
@@ -177,7 +183,6 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
       existingUsers.push(newUser);
       localStorage.setItem('travel_users', JSON.stringify(existingUsers));
       
-      // Store current session
       localStorage.setItem('travel_current_user', JSON.stringify({
         email: newUser.email,
         name: newUser.name
@@ -216,7 +221,7 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
           <CardTitle className="text-center">Almost there!</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup')}>
+          <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as 'login' | 'signup')}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="signup">Create Account</TabsTrigger>

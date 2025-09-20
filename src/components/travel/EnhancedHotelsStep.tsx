@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BudgetTracker } from './BudgetTracker';
 import { 
   Star, 
   MapPin, 
@@ -40,6 +41,7 @@ interface Hotel {
 interface HotelsData {
   selectedHotel?: Hotel;
   skipHotel: boolean;
+  totalCost: number;
 }
 
 interface HotelsStepProps {
@@ -47,8 +49,10 @@ interface HotelsStepProps {
   onBack: () => void;
   destination: string;
   budget: number;
+  spent: number;
   duration: number;
   travelers: number;
+  isFlexibleBudget?: boolean;
 }
 
 const amenityIcons: { [key: string]: any } = {
@@ -67,14 +71,13 @@ const amenityIcons: { [key: string]: any } = {
 };
 
 const mockHotels: Hotel[] = [
-  // Budget Hotels
   {
     id: 'budget1',
     name: 'Cozy Stay Inn',
     rating: 3.8,
     price: 1500,
     pricePerNight: 1500,
-    totalPrice: 0, // Will be calculated
+    totalPrice: 0, 
     image: '/api/placeholder/300/200',
     amenities: ['WiFi', 'Breakfast', 'Parking', 'AC'],
     location: 'City Center',
@@ -100,8 +103,6 @@ const mockHotels: Hotel[] = [
     highlights: ['Close to transport', 'Budget-friendly', 'Clean rooms'],
     distanceFromCenter: '2 km'
   },
-
-  // Mid-range Hotels
   {
     id: 'midrange1',
     name: 'Grand Vista Hotel',
@@ -134,8 +135,6 @@ const mockHotels: Hotel[] = [
     highlights: ['Historic charm', 'Personalized service', 'Unique character'],
     distanceFromCenter: '0.8 km'
   },
-
-  // Luxury Hotels
   {
     id: 'luxury1',
     name: 'Royal Palace Resort',
@@ -176,16 +175,18 @@ const categoryColors = {
   luxury: 'bg-purple-100 text-purple-800 border-purple-200'
 };
 
-export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, duration, travelers }: HotelsStepProps) => {
+export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, spent = 0, duration, travelers, isFlexibleBudget = false }: HotelsStepProps) => {
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
-  // Calculate total prices for each hotel
   const hotelsWithTotalPrice = mockHotels.map(hotel => ({
     ...hotel,
     totalPrice: hotel.pricePerNight * duration
   }));
+
+  const hotelCost = selectedHotel ? hotelsWithTotalPrice.find(h => h.id === selectedHotel.id)?.totalPrice || 0 : 0;
+  const totalSpent = spent + hotelCost;
 
   const filteredHotels = filterCategory === 'all' 
     ? hotelsWithTotalPrice 
@@ -193,8 +194,6 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
 
   const handleHotelSelect = (hotel: Hotel) => {
     setIsLoading(true);
-    
-    // Simulate AI processing time
     setTimeout(() => {
       setSelectedHotel(hotel);
       setIsLoading(false);
@@ -203,10 +202,10 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
 
   const handleNext = () => {
     if (!selectedHotel) return;
-    
     const data: HotelsData = {
       selectedHotel,
-      skipHotel: false
+      skipHotel: false,
+      totalCost: hotelCost,
     };
     onNext(data);
   };
@@ -222,7 +221,6 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
         </p>
       </div>
 
-      {/* Trip Summary */}
       <Card className="max-w-4xl mx-auto">
         <CardContent className="pt-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -246,7 +244,12 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
         </CardContent>
       </Card>
 
-      {/* Category Filter */}
+      <BudgetTracker 
+        totalBudget={budget}
+        spent={totalSpent}
+        isFlexible={isFlexibleBudget}
+      />
+
       <div className="flex flex-wrap gap-2 justify-center">
         {categories.map((category) => (
           <Button
@@ -260,7 +263,6 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
         ))}
       </div>
 
-      {/* Loading State */}
       {isLoading && (
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
@@ -281,7 +283,6 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
         </Card>
       )}
 
-      {/* Hotels Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredHotels.map((hotel) => (
           <Card 
@@ -377,8 +378,7 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
         ))}
       </div>
 
-      {/* Selected Hotel Summary */}
-      {selectedHotel && (
+      {selectedHotel && !isLoading && (
         <Card className="max-w-4xl mx-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -402,14 +402,13 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Cost</p>
-                <p className="text-xl font-bold text-primary">₹{selectedHotel.totalPrice.toLocaleString()}</p>
+                <p className="text-xl font-bold text-primary">₹{hotelCost.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Navigation */}
       <div className="flex justify-between max-w-4xl mx-auto">
         <Button onClick={onBack} variant="outline">
           ← Back to Activities
