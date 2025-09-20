@@ -201,13 +201,6 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
     }, 1000);
   };
 
-  const handleSkipHotel = () => {
-    const data: HotelsData = {
-      skipHotel: true
-    };
-    onNext(data);
-  };
-
   const handleNext = () => {
     if (!selectedHotel) return;
     
@@ -266,19 +259,6 @@ export const EnhancedHotelsStep = ({ onNext, onBack, destination, budget, durati
           </Button>
         ))}
       </div>
-
-      {/* Skip Hotel Option */}
-      <Card className="max-w-2xl mx-auto border-dashed">
-        <CardContent className="pt-6 text-center">
-          <h3 className="font-semibold mb-2">Already have accommodation?</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Skip this step if you've already booked a place to stay
-          </p>
-          <Button onClick={handleSkipHotel} variant="outline">
-            Skip Hotel Booking
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Loading State */}
       {isLoading && (

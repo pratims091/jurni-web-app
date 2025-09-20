@@ -4,14 +4,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { MapPin, Search, Users, Plane, Globe, Clock, Coffee, Camera, Mountain } from 'lucide-react';
+import { MapPin, Search, Users, Plane, Globe, Coffee, Camera, Mountain, Plus, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { City } from '@/data/travelData';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+interface Traveler {
+  name: string;
+  age: number;
+  gender: 'male' | 'female' | 'other';
+}
 
 interface LocationInfo {
   destination: string;
   departureCity: string;
-  numberOfTravelers: number;
+  travelers: Traveler[];
   selectedCity?: City;
 }
 
@@ -20,7 +34,7 @@ interface LocationSearchStepProps {
   initialData?: Partial<LocationInfo>;
 }
 
-const popularDestinations = [
+const popularDestinations: City[] = [
   {
     id: '1',
     name: 'Goa',
@@ -78,10 +92,10 @@ const indianCities = [
 
 export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepProps) => {
   const [searchTerm, setSearchTerm] = useState(initialData?.destination || '');
-  const [departureCity, setDepartureCity] = useState(initialData?.departureCity || '');
-  const [numberOfTravelers, setNumberOfTravelers] = useState(initialData?.numberOfTravelers || 2);
-  const [selectedDestination, setSelectedDestination] = useState(null);
-  const [showDestinationDetails, setShowDestinationDetails] = useState(false);
+  const [departureCity, setDepartureCity] = useState(initialData?.departureCity || 'Jaipur');
+  const [travelers, setTravelers] = useState<Traveler[]>(initialData?.travelers || [{ name: '', age: 30, gender: 'male' }]);
+  const [selectedDestination, setSelectedDestination] = useState<City | null>(initialData?.selectedCity || null);
+  const [showDestinationDetails, setShowDestinationDetails] = useState(!!initialData?.selectedCity);
   const [isLoading, setIsLoading] = useState(false);
 
   const filteredDestinations = popularDestinations.filter(dest =>
@@ -89,29 +103,45 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
     dest.country.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDestinationSelect = (destination) => {
+  const handleDestinationSelect = (destination: City) => {
     setIsLoading(true);
     setSelectedDestination(destination);
     setSearchTerm(`${destination.name}, ${destination.country}`);
     
-    // Simulate AI loading for destination details
     setTimeout(() => {
       setIsLoading(false);
       setShowDestinationDetails(true);
-    }, 1500);
+    }, 1000);
   };
 
   const handleNext = () => {
-    if (!searchTerm || !departureCity) return;
+    if (!searchTerm || !departureCity || !selectedDestination) return;
 
     const locationInfo: LocationInfo = {
       destination: searchTerm,
       departureCity,
-      numberOfTravelers,
+      travelers,
       selectedCity: selectedDestination
     };
     
     onNext(locationInfo);
+  };
+
+  const handleTravelerChange = (index: number, field: keyof Traveler, value: string | number) => {
+    const newTravelers = [...travelers];
+    (newTravelers[index] as any)[field] = value;
+    setTravelers(newTravelers);
+  };
+
+  const addTraveler = () => {
+    setTravelers([...travelers, { name: '', age: 30, gender: 'male' }]);
+  };
+
+  const removeTraveler = (index: number) => {
+    if (travelers.length > 1) {
+      const newTravelers = travelers.filter((_, i) => i !== index);
+      setTravelers(newTravelers);
+    }
   };
 
   return (
@@ -121,8 +151,8 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
         <p className="text-muted-foreground">Choose your destination and let AI create the perfect itinerary</p>
       </div>
 
-      {/* Search and Basic Info */}
       <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        {/* Destination Search */}
         <div className="space-y-2">
           <Label htmlFor="destination">Destination</Label>
           <div className="relative">
@@ -134,48 +164,94 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setShowDestinationDetails(false);
+                setSelectedDestination(null);
               }}
               className="pl-9"
             />
           </div>
         </div>
         
+        {/* Departure City */}
         <div className="space-y-2">
           <Label htmlFor="departure">From City</Label>
           <div className="relative">
             <Plane className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-            <select
-              value={departureCity}
-              onChange={(e) => setDepartureCity(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-input bg-background rounded-md text-sm"
-            >
-              <option value="">Select departure city</option>
-              {indianCities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
+            <Select value={departureCity} onValueChange={setDepartureCity}>
+              <SelectTrigger className="w-full pl-9">
+                <SelectValue placeholder="Select departure city" />
+              </SelectTrigger>
+              <SelectContent>
+                {indianCities.map(city => (
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         
+        {/* Travelers Dialog */}
         <div className="space-y-2">
-          <Label htmlFor="travelers">Travelers</Label>
-          <div className="relative">
-            <Users className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-            <select
-              value={numberOfTravelers}
-              onChange={(e) => setNumberOfTravelers(Number(e.target.value))}
-              className="w-full pl-9 pr-3 py-2 border border-input bg-background rounded-md text-sm"
-            >
-              {[1, 2, 3, 4, 5, 6].map(num => (
-                <option key={num} value={num}>{num} {num === 1 ? 'Traveler' : 'Travelers'}</option>
-              ))}
-            </select>
-          </div>
+          <Label>Travelers</Label>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full justify-start text-left font-normal">
+                <Users className="mr-2 h-4 w-4" />
+                {travelers.length} {travelers.length === 1 ? 'Traveler' : 'Travelers'}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Traveler Details</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                {travelers.map((traveler, index) => (
+                  <div key={index} className="grid grid-cols-4 gap-2 items-center">
+                    <Input 
+                      placeholder="Name" 
+                      value={traveler.name}
+                      onChange={(e) => handleTravelerChange(index, 'name', e.target.value)}
+                      className="col-span-2"
+                    />
+                    <Input 
+                      type="number" 
+                      placeholder="Age" 
+                      value={traveler.age}
+                      onChange={(e) => handleTravelerChange(index, 'age', parseInt(e.target.value) || 0)}
+                    />
+                    <div className="flex items-center">
+                      <Select 
+                        value={traveler.gender} 
+                        onValueChange={(value: 'male' | 'female' | 'other') => handleTravelerChange(index, 'gender', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {travelers.length > 1 && (
+                        <Button variant="ghost" size="icon" onClick={() => removeTraveler(index)} className="ml-1">
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <Button variant="outline" onClick={addTraveler}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Traveler
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
       {/* Popular Destinations */}
-      {!searchTerm && (
+      {!searchTerm && !selectedDestination && (
         <div className="space-y-4">
           <h3 className="text-xl font-semibold text-center">Popular Destinations in India</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -195,7 +271,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                   <p className="text-sm text-muted-foreground mt-1">
                     {destination.description}
                   </p>
-                  <div className="flex items-center justify-between mt-2">
+                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-muted-foreground">From</span>
                     <span className="font-semibold text-primary">₹{(destination.averageCost * 75).toLocaleString()}/day</span>
                   </div>
@@ -208,7 +284,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
 
       {/* Filtered Results */}
       {searchTerm && filteredDestinations.length > 0 && !selectedDestination && (
-        <div className="space-y-4">
+        <div className="space-y-2 max-w-4xl mx-auto">
           <h3 className="text-lg font-semibold">Search Results</h3>
           <div className="grid md:grid-cols-2 gap-4">
             {filteredDestinations.map((destination) => (
@@ -256,7 +332,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
 
       {/* Destination Details */}
       {showDestinationDetails && selectedDestination && (
-        <Card className="max-w-4xl mx-auto">
+        <Card className="max-w-4xl mx-auto animate-in fade-in-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5 text-primary" />
@@ -325,7 +401,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
       <div className="flex justify-center">
         <Button 
           onClick={handleNext} 
-          disabled={!searchTerm || !departureCity}
+          disabled={!searchTerm || !departureCity || !selectedDestination}
           variant="travel" 
           size="lg"
           className="px-8"
@@ -333,6 +409,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
           Continue to Budget & Duration
         </Button>
       </div>
+
     </div>
   );
 };
