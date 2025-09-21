@@ -2,12 +2,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Plane, 
-  Hotel, 
+import {
+  MapPin,
+  Calendar,
+  Users,
+  Plane,
+  Hotel,
   Clock,
   CheckCircle,
   AlertTriangle,
@@ -44,19 +44,23 @@ interface Hotel {
 }
 
 interface Flight {
-  id: string;
-  airline: string;
-  price: number;
-  departure: {
-    time: string;
-    airport: string;
-    city: string;
-  };
-  arrival: {
-    time: string;
-    airport: string;
-    city: string;
-  };
+    id: string;
+    airline: string;
+    flightNumber: string;
+    price: number;
+    duration: string;
+    departure: string;
+    arrival: string;
+    departureDate: string;
+    arrivalDate: string;
+    stops: number;
+    aircraft: string;
+    class_: string;
+    amenities: string[];
+    baggage: string;
+    departureAirport: string;
+    arrivalAirport: string;
+    layovers: { station: string, duration: string }[];
 }
 
 interface TripMember {
@@ -84,6 +88,8 @@ interface FinalItineraryProps {
   userEmail: string;
   onConfirm: () => void;
   onStartOver: () => void;
+  showBudget?: boolean;
+  showActions?: boolean;
 }
 
 export const FinalItinerary = ({
@@ -94,7 +100,9 @@ export const FinalItinerary = ({
   selectedFlight,
   userEmail,
   onConfirm,
-  onStartOver
+  onStartOver,
+  showBudget = true,
+  showActions = true,
 }: FinalItineraryProps) => {
   const destination = locationInfo?.destination || 'your destination';
   const travelers = locationInfo?.travelers || [];
@@ -104,7 +112,7 @@ export const FinalItinerary = ({
   const dayPlans = activitiesData?.dayPlans || [];
   const activitiesTotalCost = activitiesData?.totalCost || 0;
 
-  const duration = startDate && endDate 
+  const duration = startDate && endDate
     ? differenceInCalendarDays(endDate, startDate) + 1
     : 1;
 
@@ -115,7 +123,7 @@ export const FinalItinerary = ({
 
   const handleDownloadPdf = () => {
     const input = document.getElementById('itinerary-content');
-    if(input) {
+    if (input) {
       html2canvas(input).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF();
@@ -127,18 +135,19 @@ export const FinalItinerary = ({
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: `My Trip to ${destination}`,
-        text: `Check out my travel itinerary for ${destination}!`,
-        url: window.location.href,
-      })
+      navigator
+        .share({
+          title: `My Trip to ${destination}`,
+          text: `Check out my travel itinerary for ${destination}!`,
+          url: window.location.href,
+        })
         .then(() => console.log('Successful share'))
         .catch((error) => console.log('Error sharing', error));
     } else {
       alert('Sharing is not supported on this browser.');
     }
   };
-  
+
   return (
     <div id="itinerary-content" className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
@@ -164,7 +173,7 @@ export const FinalItinerary = ({
               </div>
               <div className="font-semibold">{destination}</div>
             </div>
-            
+
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4" />
@@ -186,34 +195,36 @@ export const FinalItinerary = ({
               <div className="font-semibold">{travelers.length} people</div>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <IndianRupee className="w-4 h-4" />
-                Budget Status
-              </div>
-              <div className="font-semibold">
-                <div className="flex items-center gap-2">
-                  <span>₹{finalCost.toLocaleString()} / ₹{budget.toLocaleString()}</span>
-                  {isOverBudget ? (
-                    <Badge variant="destructive" className="text-xs">
-                      <AlertTriangle className="w-3 h-3 mr-1" />
-                      Over Budget
-                    </Badge>
-                  ) : (
-                    <Badge variant="default" className="text-xs bg-green-500 text-white">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Within Budget
-                    </Badge>
-                  )}
+            {showBudget && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <IndianRupee className="w-4 h-4" />
+                  Budget Status
+                </div>
+                <div className="font-semibold">
+                  <div className="flex items-center gap-2">
+                    <span>₹{finalCost.toLocaleString()} / ₹{budget.toLocaleString()}</span>
+                    {isOverBudget ? (
+                      <Badge variant="destructive" className="text-xs">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Over Budget
+                      </Badge>
+                    ) : (
+                      <Badge variant="default" className="text-xs bg-green-500 text-white">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Within Budget
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
       {/* Budget Breakdown */}
-      {activitiesData && (
+      {showBudget && activitiesData && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -232,21 +243,21 @@ export const FinalItinerary = ({
                 <span>Activities ({dayPlans.reduce((sum, day) => sum + day.activities.length, 0)} total):</span>
                 <span>₹{activitiesTotalCost.toLocaleString()}</span>
               </div>
-              
+
               {selectedHotel && (
                 <div className="flex justify-between items-center">
                   <span>Hotel ({duration - 1} nights):</span>
                   <span>₹{hotelCost.toLocaleString()}</span>
                 </div>
               )}
-              
+
               {selectedFlight && (
                 <div className="flex justify-between items-center">
                   <span>Flight:</span>
                   <span>₹{flightCost.toLocaleString()}</span>
                 </div>
               )}
-              
+
               <Separator />
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>Total Cost:</span>
@@ -254,14 +265,13 @@ export const FinalItinerary = ({
                   ₹{finalCost.toLocaleString()}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center text-sm">
                 <span>Remaining Budget:</span>
                 <span className={isOverBudget ? 'text-destructive font-medium' : 'text-muted-foreground'}>
-                  {isOverBudget 
-                    ? `-₹${Math.abs(budget - finalCost).toLocaleString()}` 
-                    : `₹${(budget - finalCost).toLocaleString()}`
-                  }
+                  {isOverBudget
+                    ? `-₹${Math.abs(budget - finalCost).toLocaleString()}`
+                    : `₹${(budget - finalCost).toLocaleString()}`}
                 </span>
               </div>
             </div>
@@ -302,7 +312,7 @@ export const FinalItinerary = ({
                       <div>₹{dayPlan.totalCost.toLocaleString()}</div>
                     </div>
                   </div>
-                  
+
                   {dayPlan.activities.length === 0 ? (
                     <div className="text-center py-4 text-muted-foreground bg-muted/20 rounded-lg">
                       <p className="text-sm">Free day - No activities planned</p>
@@ -331,7 +341,7 @@ export const FinalItinerary = ({
                       ))}
                     </div>
                   )}
-                  
+
                   {dayPlan.day < dayPlans.length && <Separator />}
                 </div>
               ))}
@@ -385,11 +395,11 @@ export const FinalItinerary = ({
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Departure:</span>
-                    <span>{`${selectedFlight.departure.time} (${selectedFlight.departure.airport})`}</span>
+                    <span>{`${selectedFlight.departure} (${selectedFlight.departureAirport})`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Arrival:</span>
-                    <span>{`${selectedFlight.arrival.time} (${selectedFlight.arrival.airport})`}</span>
+                    <span>{`${selectedFlight.arrival} (${selectedFlight.arrivalAirport})`}</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t">
@@ -403,56 +413,60 @@ export const FinalItinerary = ({
       </div>
 
       {/* Trip Members */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Trip Members ({travelers.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {travelers.map((member, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
-                  {member.name ? member.name.charAt(0).toUpperCase() : 'T'}
+      {travelers && travelers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Trip Members ({travelers.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {travelers.map((member, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                  <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                    {member.name ? member.name.charAt(0).toUpperCase() : 'T'}
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">{member.name || `Traveler ${index + 1}`}</div>
+                    <div className="text-xs text-muted-foreground">{member.email}</div>
+                    {member.email === userEmail && (
+                      <Badge variant="secondary" className="text-xs mt-1">Trip Organizer</Badge>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium text-sm">{member.name || `Traveler ${index + 1}`}</div>
-                  <div className="text-xs text-muted-foreground">{member.email}</div>
-                  {member.email === userEmail && (
-                    <Badge variant="secondary" className="text-xs mt-1">Trip Organizer</Badge>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center pt-6 border-t">
-        <div className="flex gap-3">
-          <Button variant="outline" size="sm" onClick={handleDownloadPdf}>
-            <Download className="w-4 h-4 mr-2" />
-            Download PDF
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleShare}>
-            <Share className="w-4 h-4 mr-2" />
-            Share Itinerary
-          </Button>
+      {showActions && (
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center pt-6 border-t">
+          <div className="flex gap-3">
+            <Button variant="outline" size="sm" onClick={handleDownloadPdf}>
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleShare}>
+              <Share className="w-4 h-4 mr-2" />
+              Share Itinerary
+            </Button>
+          </div>
+
+          <div className="flex gap-3">
+            <Button onClick={onStartOver} variant="outline">
+              Start Over
+            </Button>
+            <Button onClick={onConfirm} variant="travel" size="lg">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Trip
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex gap-3">
-          <Button onClick={onStartOver} variant="outline">
-            Start Over
-          </Button>
-          <Button onClick={onConfirm} variant="travel" size="lg">
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Save Trip
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, Users, AlertCircle, IndianRupee } from 'lucide-react';
+import { Calendar, Clock, MapPin, AlertCircle, IndianRupee, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
 
 interface Activity {
   id: string;
@@ -29,9 +30,15 @@ interface DayPlan {
 interface DayWiseActivityPlannerProps {
   activities: Activity[];
   duration: number;
-  onNext: (dayPlans: DayPlan[]) => void;
+  onNext: (data: { dayPlans: DayPlan[], hotels: any[] }) => void;
   onBack: () => void;
   destination: string;
+  departure: string;
+  budget: number;
+  currency: string;
+  totalTravellers: number;
+  startDate: Date;
+  endDate: Date;
 }
 
 export const DayWiseActivityPlanner = ({ 
@@ -39,7 +46,13 @@ export const DayWiseActivityPlanner = ({
   duration, 
   onNext, 
   onBack, 
-  destination 
+  destination,
+  departure,
+  budget,
+  currency,
+  totalTravellers,
+  startDate,
+  endDate
 }: DayWiseActivityPlannerProps) => {
   const [dayPlans, setDayPlans] = useState<DayPlan[]>(
     Array.from({ length: duration }, (_, i) => ({
@@ -50,6 +63,7 @@ export const DayWiseActivityPlanner = ({
     }))
   );
   const [unassignedActivities, setUnassignedActivities] = useState<Activity[]>(activities);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -116,7 +130,7 @@ export const DayWiseActivityPlanner = ({
     });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (unassignedActivities.length > 0) {
       toast({
         title: "Unassigned Activities",
@@ -125,8 +139,49 @@ export const DayWiseActivityPlanner = ({
       });
       return;
     }
-    
-    onNext(dayPlans);
+
+    setIsLoading(true);
+
+    const travel_params = {
+        destination,
+        departure,
+        budget: budget.toString(),
+        currency,
+        totalTravellers: totalTravellers.toString(),
+        durationDays: duration.toString(),
+        startDate: format(startDate, 'yyyy-MM-dd'), 
+        returnDate: format(endDate, 'yyyy-MM-dd'),
+        travelClass: "economy",
+        accommodationType: "hotel"
+    };
+
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/travel-planner/chat-structured`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query_type: "hotels",
+                session_id: localStorage.getItem('session_id'),
+                user_id: localStorage.getItem('user_id'),
+                travel_params
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch hotels');
+        }
+
+        const hotelsResponse = await response.json();
+        onNext({ dayPlans, hotels: hotelsResponse.data.data });
+
+    } catch (error) {
+        console.error("Error fetching hotels:", error);
+        toast({ title: "Error", description: "Could not fetch hotel suggestions. Please try again." });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -284,8 +339,9 @@ export const DayWiseActivityPlanner = ({
         <Button 
           onClick={handleNext} 
           variant="travel"
-          disabled={unassignedActivities.length > 0}
+          disabled={unassignedActivities.length > 0 || isLoading}
         >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Continue to Hotels →
         </Button>
       </div>

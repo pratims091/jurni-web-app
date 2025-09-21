@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { MapPin, Search, Users, Plane, Globe, Coffee, Camera, Mountain, Plus, X } from 'lucide-react';
@@ -15,6 +14,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox, ComboboxOption } from '@/components/ui/combobox';
+import { Input } from '@/components/ui/input';
+import { debounce } from 'lodash';
 
 interface Traveler {
   name: string;
@@ -35,54 +37,54 @@ interface LocationSearchStepProps {
 }
 
 const popularDestinations: City[] = [
-  {
-    id: '1',
-    name: 'Goa',
-    country: 'India',
-    image: '/api/placeholder/300/200',
-    description: 'Golden beaches, Portuguese heritage, vibrant nightlife',
-    foodSpecialties: ['Goan Fish Curry', 'Bebinca', 'Feni', 'Pork Vindaloo'],
-    culturalHighlights: ['Portuguese Architecture', 'Carnival Festival', 'Beach Culture', 'Catholic Churches'],
-    landmarks: ['Baga Beach', 'Basilica of Bom Jesus', 'Fort Aguada', 'Old Goa Churches'],
-    activities: ['Beach Sports', 'Water Skiing', 'Dolphin Watching', 'Spice Plantation Tours'],
-    averageCost: 60
-  },
-  {
-    id: '2',
-    name: 'Kerala',
-    country: 'India',
-    image: '/api/placeholder/300/200',
-    description: 'Backwaters, hill stations, and Ayurveda treatments',
-    foodSpecialties: ['Appam with Stew', 'Karimeen Fish', 'Puttu', 'Kerala Sadya'],
-    culturalHighlights: ['Kathakali Dance', 'Ayurveda Traditions', 'Coconut Culture', 'Spice Heritage'],
-    landmarks: ['Alleppey Backwaters', 'Munnar Tea Gardens', 'Fort Kochi', 'Periyar Wildlife Sanctuary'],
-    activities: ['Houseboat Cruising', 'Ayurveda Treatments', 'Tea Plantation Tours', 'Wildlife Safari'],
-    averageCost: 50
-  },
-  {
-    id: '3',
-    name: 'Rajasthan',
-    country: 'India',
-    image: '/api/placeholder/300/200',
-    description: 'Majestic palaces, desert landscapes, royal heritage',
-    foodSpecialties: ['Dal Baati Churma', 'Laal Maas', 'Gatte ki Sabzi', 'Malpua'],
-    culturalHighlights: ['Rajput Heritage', 'Folk Music & Dance', 'Royal Architecture', 'Desert Culture'],
-    landmarks: ['Amber Fort', 'City Palace Udaipur', 'Hawa Mahal', 'Thar Desert'],
-    activities: ['Camel Safari', 'Palace Tours', 'Desert Camping', 'Cultural Shows'],
-    averageCost: 55
-  },
-  {
-    id: '4',
-    name: 'Himachal Pradesh',
-    country: 'India',
-    image: '/api/placeholder/300/200',
-    description: 'Snow-capped mountains, adventure sports, hill stations',
-    foodSpecialties: ['Chana Madra', 'Himachali Trout', 'Siddu', 'Aktori'],
-    culturalHighlights: ['Mountain Culture', 'Buddhist Monasteries', 'Apple Orchards', 'Adventure Sports'],
-    landmarks: ['Rohtang Pass', 'Shimla Ridge', 'Dharamshala', 'Spiti Valley'],
-    activities: ['Trekking', 'Paragliding', 'Skiing', 'Mountain Biking'],
-    averageCost: 65
-  }
+    {
+        id: '1',
+        name: 'Goa',
+        country: 'India',
+        image: '/api/placeholder/300/200',
+        description: 'Golden beaches, Portuguese heritage, vibrant nightlife',
+        foodSpecialties: ['Goan Fish Curry', 'Bebinca', 'Feni', 'Pork Vindaloo'],
+        culturalHighlights: ['Portuguese Architecture', 'Carnival Festival', 'Beach Culture', 'Catholic Churches'],
+        landmarks: ['Baga Beach', 'Basilica of Bom Jesus', 'Fort Aguada', 'Old Goa Churches'],
+        activities: ['Beach Sports', 'Water Skiing', 'Dolphin Watching', 'Spice Plantation Tours'],
+        averageCost: 60
+      },
+      {
+        id: '2',
+        name: 'Kerala',
+        country: 'India',
+        image: '/api/placeholder/300/200',
+        description: 'Backwaters, hill stations, and Ayurveda treatments',
+        foodSpecialties: ['Appam with Stew', 'Karimeen Fish', 'Puttu', 'Kerala Sadya'],
+        culturalHighlights: ['Kathakali Dance', 'Ayurveda Traditions', 'Coconut Culture', 'Spice Heritage'],
+        landmarks: ['Alleppey Backwaters', 'Munnar Tea Gardens', 'Fort Kochi', 'Periyar Wildlife Sanctuary'],
+        activities: ['Houseboat Cruising', 'Ayurveda Treatments', 'Tea Plantation Tours', 'Wildlife Safari'],
+        averageCost: 50
+      },
+      {
+        id: '3',
+        name: 'Rajasthan',
+        country: 'India',
+        image: '/api/placeholder/300/200',
+        description: 'Majestic palaces, desert landscapes, royal heritage',
+        foodSpecialties: ['Dal Baati Churma', 'Laal Maas', 'Gatte ki Sabzi', 'Malpua'],
+        culturalHighlights: ['Rajput Heritage', 'Folk Music & Dance', 'Royal Architecture', 'Desert Culture'],
+        landmarks: ['Amber Fort', 'City Palace Udaipur', 'Hawa Mahal', 'Thar Desert'],
+        activities: ['Camel Safari', 'Palace Tours', 'Desert Camping', 'Cultural Shows'],
+        averageCost: 55
+      },
+      {
+        id: '4',
+        name: 'Himachal Pradesh',
+        country: 'India',
+        image: '/api/placeholder/300/200',
+        description: 'Snow-capped mountains, adventure sports, hill stations',
+        foodSpecialties: ['Chana Madra', 'Himachali Trout', 'Siddu', 'Aktori'],
+        culturalHighlights: ['Mountain Culture', 'Buddhist Monasteries', 'Apple Orchards', 'Adventure Sports'],
+        landmarks: ['Rohtang Pass', 'Shimla Ridge', 'Dharamshala', 'Spiti Valley'],
+        activities: ['Trekking', 'Paragliding', 'Skiing', 'Mountain Biking'],
+        averageCost: 65
+      }
 ];
 
 const indianCities = [
@@ -91,34 +93,102 @@ const indianCities = [
 ];
 
 export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepProps) => {
-  const [searchTerm, setSearchTerm] = useState(initialData?.destination || '');
+  const [destinationSearch, setDestinationSearch] = useState('');
+  const [selectedCityValue, setSelectedCityValue] = useState(initialData?.destination || '');
   const [departureCity, setDepartureCity] = useState(initialData?.departureCity || 'Jaipur');
   const [travelers, setTravelers] = useState<Traveler[]>(initialData?.travelers || [{ name: '', gender: 'male' }]);
   const [selectedDestination, setSelectedDestination] = useState<City | null>(initialData?.selectedCity || null);
   const [showDestinationDetails, setShowDestinationDetails] = useState(!!initialData?.selectedCity);
   const [isLoading, setIsLoading] = useState(false);
+  const [cityOptions, setCityOptions] = useState<ComboboxOption[]>([]);
+  const [isCityLoading, setIsCityLoading] = useState(false);
 
-  const filteredDestinations = popularDestinations.filter(dest =>
-    dest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dest.country.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchCities = async (namePrefix: string) => {
+    setIsCityLoading(true);
+    try {
+      const response = await fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=IN&namePrefix=${namePrefix}`,
+        {
+          headers: {
+            'x-rapidapi-host': import.meta.env.VITE_APP_RAPIDAPI_HOST,
+            'x-rapidapi-key': import.meta.env.VITE_APP_RAPIDAPI_KEY, // Using key from .env file
+          },
+        }
+      );
+      const data = await response.json();
+      const options = data.data.map((city: any) => ({
+        value: city.name,
+        label: `${city.name}, ${city.country}`,
+      }));
+      setCityOptions(options);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      // Optionally, show an error message to the user
+    }
+    setIsCityLoading(false);
+  };
 
-  const handleDestinationSelect = (destination: City) => {
-    setIsLoading(true);
-    setSelectedDestination(destination);
-    setSearchTerm(`${destination.name}, ${destination.country}`);
+  // Initial fetch for cities
+  useEffect(() => {
+    fetchCities('');
+  }, []);
+
+  const debouncedFetchCities = useCallback(debounce(fetchCities, 300), []);
+
+  useEffect(() => {
+    if (destinationSearch) {
+      debouncedFetchCities(destinationSearch);
+    }
+  }, [destinationSearch, debouncedFetchCities]);
+
+
+  const handleDestinationSelect = (destinationValue: string) => {
+    setSelectedCityValue(destinationValue);
+    setShowDestinationDetails(false);
+
+    const selected = popularDestinations.find(d => d.name.toLowerCase() === destinationValue.toLowerCase());
     
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowDestinationDetails(true);
-    }, 1000);
+    if (selected) {
+      // If the popular destination is not in the options, add it.
+      if (!cityOptions.some(o => o.value === selected.name)) {
+        setCityOptions(prev => [{ value: selected.name, label: `${selected.name}, ${selected.country}` }, ...prev]);
+      }
+
+      setIsLoading(true);
+      setSelectedDestination(selected);
+      setTimeout(() => {
+        setIsLoading(false);
+        setShowDestinationDetails(true);
+      }, 1000);
+    } else {
+      // This can be a new city from the API
+      const cityFromOptions = cityOptions.find(o => o.value === destinationValue);
+      const newCity: City = {
+          id: destinationValue, // Temporary ID
+          name: destinationValue,
+          country: cityFromOptions ? cityFromOptions.label.split(', ')[1] : 'India', // Assume India if not found
+          image: '/api/placeholder/300/200',
+          description: 'An exciting city to explore.',
+          // You might want to fetch these details from another API
+          foodSpecialties: ['Local Delicacies'],
+          culturalHighlights: ['Historical Sites'],
+          landmarks: ['Famous Attractions'],
+          activities: ['Sightseeing'],
+          averageCost: 75,
+      };
+      setIsLoading(true);
+      setSelectedDestination(newCity);
+      setTimeout(() => {
+          setIsLoading(false);
+          setShowDestinationDetails(true);
+        }, 1000);
+    }
   };
 
   const handleNext = () => {
-    if (!searchTerm || !departureCity || !selectedDestination) return;
+    if (!selectedCityValue || !departureCity || !selectedDestination) return;
 
     const locationInfo: LocationInfo = {
-      destination: searchTerm,
+      destination: selectedCityValue,
       departureCity,
       travelers,
       selectedCity: selectedDestination
@@ -155,20 +225,15 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
         {/* Destination Search */}
         <div className="space-y-2">
           <Label htmlFor="destination">Destination</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-            <Input
-              id="destination"
-              placeholder="Search destinations..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setShowDestinationDetails(false);
-                setSelectedDestination(null);
-              }}
-              className="pl-9"
-            />
-          </div>
+          <Combobox
+            options={cityOptions}
+            value={selectedCityValue}
+            onChange={handleDestinationSelect}
+            onInputChange={setDestinationSearch}
+            placeholder="Search for a city..."
+            searchPlaceholder="Type to search cities..."
+            emptyMessage={isCityLoading ? "Loading cities..." : "No cities found."}
+          />
         </div>
         
         {/* Departure City */}
@@ -251,7 +316,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
       </div>
 
       {/* Popular Destinations */}
-      {!searchTerm && !selectedDestination && (
+      {!selectedCityValue && (
         <div className="space-y-4">
           <h3 className="text-xl font-semibold text-center">Popular Destinations in India</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -259,7 +324,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
               <Card 
                 key={destination.id} 
                 className="cursor-pointer hover:shadow-elevation transition-smooth group"
-                onClick={() => handleDestinationSelect(destination)}
+                onClick={() => handleDestinationSelect(destination.name)}
               >
                 <div className="relative h-32 bg-gradient-ocean rounded-t-lg flex items-center justify-center">
                   <MapPin className="w-8 h-8 text-white" />
@@ -274,34 +339,6 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                    <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-muted-foreground">From</span>
                     <span className="font-semibold text-primary">₹{(destination.averageCost * 83).toLocaleString()}/day</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Filtered Results */}
-      {searchTerm && filteredDestinations.length > 0 && !selectedDestination && (
-        <div className="space-y-2 max-w-4xl mx-auto">
-          <h3 className="text-lg font-semibold">Search Results</h3>
-          <div className="grid md:grid-cols-2 gap-4">
-            {filteredDestinations.map((destination) => (
-              <Card 
-                key={destination.id} 
-                className="cursor-pointer hover:shadow-elevation transition-smooth"
-                onClick={() => handleDestinationSelect(destination)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-ocean rounded-lg flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{destination.name}, {destination.country}</h4>
-                      <p className="text-sm text-muted-foreground">{destination.description}</p>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -401,7 +438,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
       <div className="flex justify-center">
         <Button 
           onClick={handleNext} 
-          disabled={!searchTerm || !departureCity || !selectedDestination}
+          disabled={!selectedCityValue || !departureCity || !selectedDestination}
           variant="travel" 
           size="lg"
           className="px-8"

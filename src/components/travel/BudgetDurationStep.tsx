@@ -9,7 +9,8 @@ import {
   IndianRupee, 
   Calendar, 
   Wallet, 
-  Star
+  Star,
+  Loader2
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar as CalendarIcon } from "lucide-react"
@@ -31,6 +32,7 @@ interface BudgetDurationData {
   endDate: Date;
   currency: string;
   selectedPlan?: TripPlan;
+  activities?: any[]; // To hold activities from API
 }
 
 interface BudgetDurationStepProps {
@@ -38,6 +40,8 @@ interface BudgetDurationStepProps {
   onBack: () => void;
   initialData?: Partial<BudgetDurationData>;
   destination: string;
+  departure: string;
+  totalTravellers: number;
 }
 
 interface TripPlan {
@@ -91,7 +95,7 @@ const CURRENCY_SYMBOLS = {
   GBP: '£'
 };
 
-export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }: BudgetDurationStepProps) => {
+export const BudgetDurationStep = ({ onNext, onBack, initialData, destination, departure, totalTravellers }: BudgetDurationStepProps) => {
   const [selectedPlan, setSelectedPlan] = useState<TripPlan | null>(initialData?.selectedPlan || null);
   const [customBudget, setCustomBudget] = useState(initialData?.budget?.toString() || '');
   const [date, setDate] = useState<DateRange | undefined>({
@@ -136,22 +140,63 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    setIsLoading(true);
     const budget = selectedPlan ? selectedPlan.budget : parseInt(customBudget);
     const duration = selectedPlan ? selectedPlan.duration : tripDuration;
     
-    if (!budget || !duration || !date?.from || !date?.to) return;
-    
-    const data: BudgetDurationData = {
-      budget,
-      duration,
-      startDate: date.from,
-      endDate: date.to,
-      currency,
-      selectedPlan: selectedPlan || undefined
+    if (!budget || !duration || !date?.from || !date?.to) {
+        setIsLoading(false);
+        return;
+    }
+
+    const travel_params = {
+        destination,
+        departure,
+        budget: budget.toString(),
+        currency,
+        totalTravellers: totalTravellers.toString(),
+        durationDays: duration.toString()
     };
-    
-    onNext(data);
+
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/travel-planner/chat-structured`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query_type: "activities",
+                session_id: localStorage.getItem('session_id'),
+                user_id: localStorage.getItem('user_id'),
+                travel_params
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch activities');
+        }
+
+        const activitiesData = await response.json();
+        
+        const data: BudgetDurationData = {
+            budget,
+            duration,
+            startDate: date.from,
+            endDate: date.to,
+            currency,
+            selectedPlan: selectedPlan || undefined,
+            activities: activitiesData.data.data // Assuming this is the path to activities array
+        };
+        
+        onNext(data);
+
+    } catch (error) {
+        console.error("Error fetching activities:", error);
+        // Handle error, maybe show a toast message
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   const renderCurrency = (amount: number) => {
@@ -301,16 +346,16 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
         </CardContent>
       </Card>
 
-       {/* Loading State */}
-      {isLoading && !selectedPlan && (
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-              <CardTitle>Updating your preferences...</CardTitle>
-            </div>
-          </CardHeader>
-        </Card>
+      {/* Loading State */}
+      {isLoading && (
+          <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                  <div className="flex items-center gap-2">
+                      <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+                      <CardTitle>Updating your preferences...</CardTitle>
+                  </div>
+              </CardHeader>
+          </Card>
       )}
 
       {/* Navigation */}
@@ -320,9 +365,10 @@ export const BudgetDurationStep = ({ onNext, onBack, initialData, destination }:
         </Button>
         <Button 
           onClick={handleNext}
-          disabled={!customBudget && !selectedPlan}
+          disabled={isLoading || (!customBudget && !selectedPlan)}
           variant="travel"
         >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} 
           Continue to Activities →
         </Button>
       </div>

@@ -53,22 +53,39 @@ export const EnhancedTravelBookingFlow = () => {
     setCurrentStep('day-planner');
   };
 
-  const handleDayPlannerNext = (data: any) => {
+  const handleDayPlannerNext = (data: { dayPlans: any[], hotels: any[] }) => {
     const dayPlansData = {
-      dayPlans: data,
-      totalCost: data.reduce((total: number, day: any) => total + day.totalCost, 0),
+      dayPlans: data.dayPlans,
+      totalCost: data.dayPlans.reduce((total: number, day: any) => total + day.totalCost, 0),
     };
-    setTripData({ ...tripData, dayPlansData });
+    setTripData({ ...tripData, dayPlansData, hotelsData: { hotels: data.hotels } });
     setCurrentStep('hotels');
   };
 
-  const handleHotelsNext = (data: any) => {
-    setTripData({ ...tripData, hotelsData: data });
+  const handleHotelsNext = (data: { selectedHotel: any, skipHotel: boolean, totalCost: number, flights: any[] }) => {
+    setTripData(prevTripData => ({
+        ...prevTripData,
+        hotelsData: {
+            ...prevTripData.hotelsData,
+            selectedHotel: data.selectedHotel,
+            skipHotel: data.skipHotel,
+            totalCost: data.totalCost
+        },
+        flightsData: { flights: data.flights }
+    }));
     setCurrentStep('flights');
   };
 
-  const handleFlightsNext = (data: any) => {
-    setTripData({ ...tripData, flightsData: data });
+  const handleFlightsNext = (data: { selectedFlight: any, skipFlight: boolean, totalCost: number }) => {
+    setTripData(prevTripData => ({
+        ...prevTripData,
+        flightsData: {
+            ...prevTripData.flightsData,
+            selectedFlight: data.selectedFlight,
+            skipFlight: data.skipFlight,
+            totalCost: data.totalCost
+        }
+    }));
     setCurrentStep('summary');
   };
 
@@ -124,6 +141,8 @@ export const EnhancedTravelBookingFlow = () => {
             onBack={goToPreviousStep}
             initialData={tripData.budgetDurationData}
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
+            departure={tripData.locationInfo?.departureCity || ''}
+            totalTravellers={tripData.locationInfo?.travelers?.length || 1}
           />
         );
         
@@ -135,6 +154,7 @@ export const EnhancedTravelBookingFlow = () => {
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
             budget={initialBudget}
             duration={tripData.budgetDurationData?.duration || 5}
+            activities={tripData.budgetDurationData?.activities || []}
             isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible}
           />
         );
@@ -147,6 +167,12 @@ export const EnhancedTravelBookingFlow = () => {
             onNext={handleDayPlannerNext}
             onBack={goToPreviousStep}
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
+            departure={tripData.locationInfo?.departureCity || ''}
+            budget={tripData.budgetDurationData?.budget || 0}
+            currency={tripData.budgetDurationData?.currency || 'INR'}
+            totalTravellers={tripData.locationInfo?.travelers?.length || 1}
+            startDate={tripData.budgetDurationData?.startDate}
+            endDate={tripData.budgetDurationData?.endDate}
           />
         );
         
@@ -156,10 +182,16 @@ export const EnhancedTravelBookingFlow = () => {
             onNext={handleHotelsNext}
             onBack={goToPreviousStep}
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
+            departure={tripData.locationInfo?.departureCity || ''}
             budget={initialBudget}
+            currency={tripData.budgetDurationData?.currency || 'INR'}
             spent={activitiesCost}
             duration={tripData.budgetDurationData?.duration || 5}
             travelers={tripData.locationInfo?.travelers.length || 2}
+            hotels={tripData.hotelsData?.hotels || []}
+            initialData={tripData.hotelsData}
+            startDate={tripData.budgetDurationData?.startDate}
+            endDate={tripData.budgetDurationData?.endDate}
             isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible}
           />
         );
@@ -167,13 +199,15 @@ export const EnhancedTravelBookingFlow = () => {
       case 'flights':
         return (
           <FlightsStep
-            onNext={(selectedFlight, skipFlight) => handleFlightsNext({ selectedFlight, skipFlight, totalCost: selectedFlight ? selectedFlight.price * (tripData.locationInfo?.travelers.length || 1) : 0 })}
+            onNext={handleFlightsNext}
             onBack={goToPreviousStep}
-            departure={"Your Location"}
+            departure={tripData.locationInfo?.departureCity || 'Your Location'}
             destination={tripData.locationInfo?.destination || 'Selected Destination'}
             travelers={tripData.locationInfo?.travelers.length || 1}
             budget={initialBudget}
             spent={activitiesCost + hotelCost}
+            flights={tripData.flightsData?.flights || []}
+            initialData={tripData.flightsData}
             isFlexibleBudget={tripData.budgetDurationData?.budgetFlexible}
           />
         );

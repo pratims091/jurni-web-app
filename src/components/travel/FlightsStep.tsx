@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,12 +7,12 @@ import { BudgetTracker } from './BudgetTracker';
 import { 
   Plane, 
   Clock, 
-  Users,
   Luggage,
   Wifi,
   Coffee,
   Tv,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -20,139 +20,71 @@ interface Flight {
   id: string;
   airline: string;
   flightNumber: string;
-  aircraft: string;
   price: number;
-  originalPrice?: number;
-  departure: {
-    time: string;
-    airport: string;
-    city: string;
-  };
-  arrival: {
-    time: string;
-    airport: string;
-    city: string;
-  };
   duration: string;
+  departure: string;
+  arrival: string;
+  departureDate: string;
+  arrivalDate: string;
   stops: number;
-  stopDetails?: string[];
-  layoverTime?: string;
-  baggage: string;
-  seatType: string;
+  aircraft: string;
+  class_: string;
   amenities: string[];
-  cancellation: string;
-  meal: boolean;
-  popular: boolean;
-  deal: boolean;
-  onTimePerformance: number;
+  baggage: string;
+  departureAirport: string;
+  arrivalAirport: string;
+  layovers: { station: string, duration: string }[];
+}
+
+interface FlightsData {
+  selectedFlight?: Flight;
+  skipFlight: boolean;
+  totalCost: number;
+  flights?: Flight[];
 }
 
 interface FlightsStepProps {
-  onNext: (selectedFlight: Flight | null, skipFlight: boolean) => void;
+  onNext: (data: { selectedFlight: Flight | null, skipFlight: boolean, totalCost: number }) => void;
   onBack: () => void;
   departure: string;
   destination: string;
   travelers: number;
   budget: number;
   spent: number;
+  flights: Flight[];
+  initialData?: Partial<FlightsData>;
   isFlexibleBudget?: boolean;
 }
 
-const availableFlights: Flight[] = [
-  {
-    id: '1',
-    airline: 'SkyBlue Airways',
-    flightNumber: 'SB-2341',
-    aircraft: 'Airbus A320',
-    price: 12000,
-    departure: {
-      time: '14:30',
-      airport: 'DEL',
-      city: 'Delhi'
-    },
-    arrival: {
-      time: '16:45',
-      airport: 'GOI',
-      city: 'Goa'
-    },
-    duration: '2h 15m',
-    stops: 0,
-    baggage: '15kg checked + 7kg cabin',
-    seatType: 'economy',
-    amenities: ['Meal', 'Entertainment'],
-    cancellation: 'Free up to 24h',
-    meal: true,
-    popular: true,
-    deal: false,
-    onTimePerformance: 92
-  },
-  {
-    id: '2',
-    airline: 'Budget Wings',
-    flightNumber: 'BW-5432',
-    aircraft: 'Boeing 737',
-    price: 8500,
-    departure: {
-      time: '08:15',
-      airport: 'DEL',
-      city: 'Delhi'
-    },
-    arrival: {
-      time: '13:45',
-      airport: 'GOI',
-      city: 'Goa'
-    },
-    duration: '4h 30m',
-    stops: 1,
-    stopDetails: ['Mumbai'],
-    layoverTime: '1h 20m',
-    baggage: '15kg checked + 7kg cabin',
-    seatType: 'economy',
-    amenities: ['Snacks'],
-    cancellation: 'Charges apply',
-    meal: true,
-    popular: false,
-    deal: false,
-    onTimePerformance: 87
-  },
-  {
-    id: '3',
-    airline: 'QuickJet',
-    flightNumber: 'QJ-7890',
-    aircraft: 'Airbus A320neo',
-    price: 15500,
-    departure: {
-      time: '19:20',
-      airport: 'DEL',
-      city: 'Delhi'
-    },
-    arrival: {
-      time: '22:05',
-      airport: 'GOI',
-      city: 'Goa'
-    },
-    duration: '2h 45m',
-    stops: 0,
-    baggage: '20kg checked + 8kg cabin',
-    seatType: 'economy',
-    amenities: ['Meal', 'WiFi', 'Entertainment'],
-    cancellation: 'Free up to 2h',
-    meal: true,
-    popular: true,
-    deal: false,
-    onTimePerformance: 94
-  }
-];
-
 const amenityIcons: { [key: string]: React.ElementType } = {
-  Meal: Coffee,
-  Entertainment: Tv,
-  WiFi: Wifi,
-  Snacks: Coffee,
+  'Snacks': Coffee,
+  'Vegan Meal Available': Coffee,
+  'Meal': Coffee,
+  'Entertainment': Tv,
+  'WiFi': Wifi,
 };
 
-export const FlightsStep = ({ onNext, onBack, departure, destination, travelers, budget, spent = 0, isFlexibleBudget = false }: FlightsStepProps) => {
-  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+const convertDurationToMinutes = (duration: string): number => {
+  const parts = duration.match(/(\d+)h\s*(\d+)?m?/);
+  if (!parts) return 0;
+  const hours = parseInt(parts[1], 10) || 0;
+  const minutes = parseInt(parts[2], 10) || 0;
+  return hours * 60 + minutes;
+};
+
+export const FlightsStep = ({
+  onNext,
+  onBack,
+  departure,
+  destination,
+  travelers,
+  budget,
+  spent = 0,
+  flights = [],
+  initialData,
+  isFlexibleBudget = false
+}: FlightsStepProps) => {
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(initialData?.selectedFlight || null);
   const [sortBy, setSortBy] = useState('recommended');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -161,28 +93,33 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers,
 
   const handleFlightSelect = (flight: Flight) => {
     setIsLoading(true);
-    setSelectedFlight(flight);
-    
     setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+        setSelectedFlight(flight);
+        setIsLoading(false);
+    }, 500);
   };
 
   const handleNext = () => {
     if (!selectedFlight) return;
-    onNext(selectedFlight, false);
+    onNext({ selectedFlight, skipFlight: false, totalCost: flightCost });
   };
 
-  const sortedFlights = [...availableFlights].sort((a, b) => {
+  const sortedFlights = [...flights].sort((a, b) => {
     switch (sortBy) {
       case 'price-low': return a.price - b.price;
       case 'price-high': return b.price - a.price;
-      case 'duration': return parseInt(a.duration) - parseInt(b.duration);
-      case 'departure': return a.departure.time.localeCompare(b.departure.time);
-      case 'arrival': return a.arrival.time.localeCompare(b.arrival.time);
-      default: return (b.popular ? 1 : 0) - (a.popular ? 1 : 0);
+      case 'duration': return convertDurationToMinutes(a.duration) - convertDurationToMinutes(b.duration);
+      case 'departure': return a.departure.localeCompare(b.departure);
+      case 'arrival': return a.arrival.localeCompare(b.arrival);
+      default: return 0; // No default recommendation logic for now
     }
   });
+
+  useEffect(() => {
+    if (initialData?.selectedFlight) {
+        setSelectedFlight(initialData.selectedFlight);
+    }
+  }, [initialData]);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -220,7 +157,9 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers,
       </div>
 
       <div className="space-y-4">
-        {sortedFlights.map((flight) => (
+        {flights.length === 0 ? (
+            <Card><CardContent className="p-6 text-center text-muted-foreground">No flights found for the selected criteria.</CardContent></Card>
+        ) : sortedFlights.map((flight) => (
           <Card 
             key={flight.id}
             className={`cursor-pointer transition-all hover:shadow-lg ${
@@ -240,33 +179,35 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers,
                     </div>
                   </div>
                   <Badge variant="outline" className="capitalize bg-blue-100 text-blue-800 border-blue-200">
-                    {flight.seatType}
+                    {flight.class_}
                   </Badge>
                 </div>
 
-                <div className="col-span-3 text-center">
-                  <div className="text-xl font-bold">{flight.departure.time}</div>
-                  <div className="text-sm text-muted-foreground">{flight.departure.airport}</div>
+                <div className="col-span-2 text-center">
+                  <div className="text-xl font-bold">{flight.departure}</div>
+                  <div className="text-sm text-muted-foreground">{flight.departureAirport}</div>
                 </div>
 
-                <div className="col-span-2 text-center">
+                <div className="col-span-3 text-center">
                   <div className="text-sm text-muted-foreground">{flight.duration}</div>
                   <div className="flex items-center justify-center">
                     <div className="flex-grow border-t border-dashed"></div>
                     <ArrowRight className="w-4 h-4 mx-2 text-muted-foreground" />
                     <div className="flex-grow border-t border-dashed"></div>
                   </div>
-                  {flight.stops > 0 && (
+                  {flight.stops > 0 ? (
                     <div className="text-xs text-red-500">{flight.stops} stop(s)</div>
+                  ) : (
+                    <div className="text-xs text-green-600">Direct</div>
                   )}
-                  {flight.layoverTime && (
-                     <div className="text-xs text-muted-foreground">Layover in {flight.layoverTime}</div>
+                  {flight.layovers.length > 0 && (
+                     <div className="text-xs text-muted-foreground">via {flight.layovers.map(l => l.station).join(', ')}</div>
                   )}
                 </div>
 
                 <div className="col-span-2 text-center">
-                  <div className="text-xl font-bold">{flight.arrival.time}</div>
-                  <div className="text-sm text-muted-foreground">{flight.arrival.airport}</div>
+                  <div className="text-xl font-bold">{flight.arrival}</div>
+                  <div className="text-sm text-muted-foreground">{flight.arrivalAirport}</div>
                 </div>
                 
                 <div className="col-span-2 text-right">
@@ -276,7 +217,7 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers,
               </div>
 
               <div className="border-t mt-4 pt-4 flex justify-between items-center">
-                <div className="col-span-6 space-y-2">
+                <div className="space-y-2">
                     <div className="text-sm font-semibold">Includes</div>
                      <div className="flex items-center gap-4 text-sm">
                        {flight.amenities.map((amenity) => {
@@ -287,10 +228,12 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers,
                           </Badge>
                         );
                       })}
+                      <Badge variant='outline' className='bg-gray-100'>
+                        <Luggage className="w-3 h-3 mr-1.5" /> {flight.baggage}
+                      </Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground">Baggage: {flight.baggage}</div>
                   </div>
-                <div className="col-span-6 text-right">
+                <div className="text-right">
                    <div className="text-sm text-muted-foreground">Aircraft: {flight.aircraft}</div>
                    <div className="font-semibold">Total for {travelers} travelers: ₹{(flight.price * travelers).toLocaleString()}</div>
                 </div>
@@ -301,26 +244,17 @@ export const FlightsStep = ({ onNext, onBack, departure, destination, travelers,
       </div>
 
       {isLoading && (
-        <Card className="max-w-2xl mx-auto">
+        <Card className="max-w-2xl mx-auto mt-4">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-              <CardTitle>Confirming flight availability and pricing...</CardTitle>
+              <Loader2 className="animate-spin w-5 h-5" />
+              <CardTitle>Confirming flight selection...</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <div className="flex gap-2">
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-14" />
-            </div>
-          </CardContent>
         </Card>
       )}
 
-      <div className="flex justify-between max-w-4xl mx-auto">
+      <div className="flex justify-between max-w-4xl mx-auto pt-4">
         <Button onClick={onBack} variant="outline">
           ← Back to Hotels
         </Button>
