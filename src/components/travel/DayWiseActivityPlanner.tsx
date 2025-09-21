@@ -1,11 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, AlertCircle, IndianRupee, Loader2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { format } from 'date-fns';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  AlertCircle,
+  IndianRupee,
+  Loader2,
+} from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
 interface Activity {
   id: string;
@@ -30,7 +43,7 @@ interface DayPlan {
 interface DayWiseActivityPlannerProps {
   activities: Activity[];
   duration: number;
-  onNext: (data: { dayPlans: DayPlan[], hotels: any[] }) => void;
+  onNext: (data: { dayPlans: DayPlan[]; hotels: any[] }) => void;
   onBack: () => void;
   destination: string;
   departure: string;
@@ -41,28 +54,29 @@ interface DayWiseActivityPlannerProps {
   endDate: Date;
 }
 
-export const DayWiseActivityPlanner = ({ 
-  activities, 
-  duration, 
-  onNext, 
-  onBack, 
+export const DayWiseActivityPlanner = ({
+  activities,
+  duration,
+  onNext,
+  onBack,
   destination,
   departure,
   budget,
   currency,
   totalTravellers,
   startDate,
-  endDate
+  endDate,
 }: DayWiseActivityPlannerProps) => {
   const [dayPlans, setDayPlans] = useState<DayPlan[]>(
     Array.from({ length: duration }, (_, i) => ({
       day: i + 1,
       activities: [],
       totalDuration: 0,
-      totalCost: 0
+      totalCost: 0,
     }))
   );
-  const [unassignedActivities, setUnassignedActivities] = useState<Activity[]>(activities);
+  const [unassignedActivities, setUnassignedActivities] =
+    useState<Activity[]>(activities);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -72,7 +86,7 @@ export const DayWiseActivityPlanner = ({
         day: i + 1,
         activities: [] as Activity[],
         totalDuration: 0,
-        totalCost: 0
+        totalCost: 0,
       }));
 
       activities.forEach((activity, index) => {
@@ -87,7 +101,8 @@ export const DayWiseActivityPlanner = ({
 
       toast({
         title: "Activities Auto-Assigned",
-        description: "We've created a draft plan for you. Feel free to make changes.",
+        description:
+          "We've created a draft plan for you. Feel free to make changes.",
       });
     }
   }, [activities, duration, toast]);
@@ -95,16 +110,18 @@ export const DayWiseActivityPlanner = ({
   const assignActivityToDay = (activity: Activity, dayNumber: number) => {
     const newDayPlans = [...dayPlans];
     const dayIndex = dayNumber - 1;
-    
+
     newDayPlans[dayIndex].activities.push(activity);
     newDayPlans[dayIndex].totalDuration += activity.duration;
     newDayPlans[dayIndex].totalCost += activity.cost;
-    
-    const newUnassigned = unassignedActivities.filter(a => a.id !== activity.id);
-    
+
+    const newUnassigned = unassignedActivities.filter(
+      (a) => a.id !== activity.id
+    );
+
     setDayPlans(newDayPlans);
     setUnassignedActivities(newUnassigned);
-    
+
     toast({
       title: "Activity Assigned",
       description: `${activity.name} added to Day ${dayNumber}`,
@@ -114,16 +131,18 @@ export const DayWiseActivityPlanner = ({
   const removeActivityFromDay = (activity: Activity, dayNumber: number) => {
     const newDayPlans = [...dayPlans];
     const dayIndex = dayNumber - 1;
-    
-    newDayPlans[dayIndex].activities = newDayPlans[dayIndex].activities.filter(a => a.id !== activity.id);
+
+    newDayPlans[dayIndex].activities = newDayPlans[dayIndex].activities.filter(
+      (a) => a.id !== activity.id
+    );
     newDayPlans[dayIndex].totalDuration -= activity.duration;
     newDayPlans[dayIndex].totalCost -= activity.cost;
-    
+
     const newUnassigned = [...unassignedActivities, activity];
-    
+
     setDayPlans(newDayPlans);
     setUnassignedActivities(newUnassigned);
-    
+
     toast({
       title: "Activity Removed",
       description: `${activity.name} removed from Day ${dayNumber}`,
@@ -134,8 +153,9 @@ export const DayWiseActivityPlanner = ({
     if (unassignedActivities.length > 0) {
       toast({
         title: "Unassigned Activities",
-        description: "Please assign all activities to specific days or remove them.",
-        variant: "destructive"
+        description:
+          "Please assign all activities to specific days or remove them.",
+        variant: "destructive",
       });
       return;
     }
@@ -143,53 +163,62 @@ export const DayWiseActivityPlanner = ({
     setIsLoading(true);
 
     const travel_params = {
-        destination,
-        departure,
-        budget: budget.toString(),
-        currency,
-        totalTravellers: totalTravellers.toString(),
-        durationDays: duration.toString(),
-        startDate: format(startDate, 'yyyy-MM-dd'), 
-        returnDate: format(endDate, 'yyyy-MM-dd'),
-        travelClass: "economy",
-        accommodationType: "hotel"
+      destination,
+      departure,
+      budget: budget.toString(),
+      currency,
+      totalTravellers: totalTravellers.toString(),
+      durationDays: duration.toString(),
+      startDate: format(startDate, "yyyy-MM-dd"),
+      returnDate: format(endDate, "yyyy-MM-dd"),
+      travelClass: "economy",
+      accommodationType: "hotel",
     };
 
     try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/travel-planner/chat-structured`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                query_type: "hotels",
-                session_id: localStorage.getItem('session_id'),
-                user_id: localStorage.getItem('user_id'),
-                travel_params
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch hotels');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/travel-planner/chat-structured`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query_type: "hotels",
+            session_id: localStorage.getItem("session_id"),
+            user_id: localStorage.getItem("user_id"),
+            travel_params,
+          }),
         }
+      );
 
-        const hotelsResponse = await response.json();
-        onNext({ dayPlans, hotels: hotelsResponse.data.data });
+      if (!response.ok) {
+        throw new Error("Failed to fetch hotels");
+      }
 
+      const hotelsResponse = await response.json();
+      onNext({ dayPlans, hotels: hotelsResponse.data.data });
     } catch (error) {
-        console.error("Error fetching hotels:", error);
-        toast({ title: "Error", description: "Could not fetch hotel suggestions. Please try again." });
+      console.error("Error fetching hotels:", error);
+      toast({
+        title: "Error",
+        description: "Could not fetch hotel suggestions. Please try again.",
+      });
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-800 border-green-200';
-      case 'moderate': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'hard': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case "easy":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "moderate":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "hard":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -198,7 +227,8 @@ export const DayWiseActivityPlanner = ({
       <div className="text-center">
         <h2 className="text-3xl font-bold mb-2">Plan Your Days</h2>
         <p className="text-muted-foreground">
-          Assign your selected activities to specific days of your {duration}-day trip to {destination}
+          Assign your selected activities to specific days of your {duration}
+          -day trip to {destination}
         </p>
       </div>
 
@@ -217,27 +247,42 @@ export const DayWiseActivityPlanner = ({
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="font-semibold text-sm">{activity.name}</h4>
-                        <p className="text-xs text-muted-foreground">{activity.location}</p>
+                        <h4 className="font-semibold text-sm">
+                          {activity.name}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {activity.location}
+                        </p>
                       </div>
                       <span className="text-lg">{activity.icon}</span>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-1">
                       <Badge variant="outline" className="text-xs">
                         <Clock className="w-3 h-3 mr-1" />
                         {activity.duration}h
                       </Badge>
-                      <Badge variant="outline" className="text-xs flex items-center">
+                      <Badge
+                        variant="outline"
+                        className="text-xs flex items-center"
+                      >
                         <IndianRupee className="w-3 h-3 mr-1" />
                         {activity.cost}
                       </Badge>
-                      <Badge className={`text-xs border ${getDifficultyColor(activity.difficulty)}`}>
+                      <Badge
+                        className={`text-xs border ${getDifficultyColor(
+                          activity.difficulty
+                        )}`}
+                      >
                         {activity.difficulty}
                       </Badge>
                     </div>
-                    
-                    <Select onValueChange={(value) => assignActivityToDay(activity, parseInt(value))}>
+
+                    <Select
+                      onValueChange={(value) =>
+                        assignActivityToDay(activity, parseInt(value))
+                      }
+                    >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Assign to day..." />
                       </SelectTrigger>
@@ -290,24 +335,33 @@ export const DayWiseActivityPlanner = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-sm">{activity.icon}</span>
-                          <h4 className="font-medium text-sm truncate">{activity.name}</h4>
+                          <h4 className="font-medium text-sm truncate">
+                            {activity.name}
+                          </h4>
                         </div>
                         <div className="flex flex-wrap gap-1 mb-2">
                           <Badge variant="secondary" className="text-xs">
                             <Clock className="w-3 h-3 mr-1" />
                             {activity.duration}h
                           </Badge>
-                          <Badge variant="secondary" className="text-xs flex items-center">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs flex items-center"
+                          >
                             <IndianRupee className="w-3 h-3 mr-1" />
                             {activity.cost}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">{activity.location}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {activity.location}
+                        </p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeActivityFromDay(activity, dayPlan.day)}
+                        onClick={() =>
+                          removeActivityFromDay(activity, dayPlan.day)
+                        }
                         className="ml-2 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                       >
                         ×
@@ -328,7 +382,9 @@ export const DayWiseActivityPlanner = ({
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
             {unassignedActivities.length === 0 ? (
-              <span className="text-green-500 font-medium">All activities assigned!</span>
+              <span className="text-green-500 font-medium">
+                All activities assigned!
+              </span>
             ) : (
               <span className="text-yellow-500 font-medium">
                 {unassignedActivities.length} activities need to be assigned
@@ -336,8 +392,8 @@ export const DayWiseActivityPlanner = ({
             )}
           </p>
         </div>
-        <Button 
-          onClick={handleNext} 
+        <Button
+          onClick={handleNext}
           variant="travel"
           disabled={unassignedActivities.length > 0 || isLoading}
         >

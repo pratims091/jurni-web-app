@@ -68,6 +68,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
 
   const handleLogout = () => {
     localStorage.removeItem('travel_current_user');
+    localStorage.removeItem('auth_token');
     setCurrentUser(null);
     navigate('/');
   };

@@ -106,6 +106,7 @@ export const FinalItinerary = ({
   showBudget = true,
   showActions = true,
 }: FinalItineraryProps) => {
+    
   const destination = locationInfo?.destination || 'your destination';
   const travelers = locationInfo?.travelers || [];
   const budget = budgetDurationData?.budget || 0;

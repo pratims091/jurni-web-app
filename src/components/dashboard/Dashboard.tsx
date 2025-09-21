@@ -34,12 +34,12 @@ const Dashboard = () => {
         >
           Profile
         </button>
-        <button 
+        {/* <button 
           className={`px-4 py-2 text-sm font-medium ${activeTab === 'bookings' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('bookings')}
         >
           Bookings
-        </button>
+        </button> */}
       </div>
       <div>{renderContent()}</div>
     </div>
