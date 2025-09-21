@@ -19,6 +19,8 @@ import { format, differenceInCalendarDays } from 'date-fns';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// ... (interface definitions remain the same) ...
+
 interface Activity {
   id: string;
   name: string;
