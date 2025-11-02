@@ -217,7 +217,7 @@ export const SignupLoginStep = ({ onNext, onBack }: SignupLoginStepProps) => {
         localStorage.setItem("auth_token", data.token);
 
         toast({
-          title: "Welcome to TravelPlanner!",
+          title: "Welcome to Jurni!",
           description: `Account created successfully for ${data.user.first_name}`,
         });
 

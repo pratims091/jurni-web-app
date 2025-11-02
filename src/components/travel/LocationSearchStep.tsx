@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -93,6 +94,7 @@ const indianCities = [
 ];
 
 export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepProps) => {
+  const { t } = useTranslation();
   const [destinationSearch, setDestinationSearch] = useState('');
   const [selectedCityValue, setSelectedCityValue] = useState(initialData?.destination || '');
   const [departureCity, setDepartureCity] = useState(initialData?.departureCity || 'Jaipur');
@@ -167,12 +169,12 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
           name: destinationValue,
           country: cityFromOptions ? cityFromOptions.label.split(', ')[1] : 'India', // Assume India if not found
           image: '/api/placeholder/300/200',
-          description: 'An exciting city to explore.',
+          description: t('an_exciting_city_to_explore'),
           // You might want to fetch these details from another API
-          foodSpecialties: ['Local Delicacies'],
-          culturalHighlights: ['Historical Sites'],
-          landmarks: ['Famous Attractions'],
-          activities: ['Sightseeing'],
+          foodSpecialties: [t('local_delicacies')],
+          culturalHighlights: [t('historical_sites')],
+          landmarks: [t('famous_attractions')],
+          activities: [t('sightseeing')],
           averageCost: 75,
       };
       setIsLoading(true);
@@ -217,33 +219,33 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Where would you like to go?</h2>
-        <p className="text-muted-foreground">Choose your destination and let AI create the perfect itinerary</p>
+        <h2 className="text-3xl font-bold mb-2">{t('where_to_go')}</h2>
+        <p className="text-muted-foreground">{t('choose_destination_and_let_ai_create_itinerary')}</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
         {/* Destination Search */}
         <div className="space-y-2">
-          <Label htmlFor="destination">Destination</Label>
+          <Label htmlFor="destination">{t('destinations')}</Label>
           <Combobox
             options={cityOptions}
             value={selectedCityValue}
             onChange={handleDestinationSelect}
             onInputChange={setDestinationSearch}
-            placeholder="Search for a city..."
-            searchPlaceholder="Type to search cities..."
-            emptyMessage={isCityLoading ? "Loading cities..." : "No cities found."}
+            placeholder={t('search_for_a_city')}
+            searchPlaceholder={t('type_to_search_cities')}
+            emptyMessage={isCityLoading ? t('loading_cities') : t('no_cities_found')}
           />
         </div>
         
         {/* Departure City */}
         <div className="space-y-2">
-          <Label htmlFor="departure">From City</Label>
+          <Label htmlFor="departure">{t('from_city')}</Label>
           <div className="relative">
             <Plane className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
             <Select value={departureCity} onValueChange={setDepartureCity}>
               <SelectTrigger className="w-full pl-9">
-                <SelectValue placeholder="Select departure city" />
+                <SelectValue placeholder={t('select_departure_city')} />
               </SelectTrigger>
               <SelectContent>
                 {indianCities.map(city => (
@@ -256,30 +258,30 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
         
         {/* Travelers Dialog */}
         <div className="space-y-2">
-          <Label>Travelers</Label>
+          <Label>{t('travelers')}</Label>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" className="w-full justify-start text-left font-normal">
                 <Users className="mr-2 h-4 w-4" />
-                {travelers.length} {travelers.length === 1 ? 'Traveler' : 'Travelers'}
+                {t('traveler', {count: travelers.length})}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Traveler Details</DialogTitle>
+                <DialogTitle>{t('traveler_details')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 {travelers.map((traveler, index) => (
                   <div key={index} className="grid grid-cols-4 gap-2 items-center">
                     <Input 
-                      placeholder="Name"
+                      placeholder={t('name')}
                       value={traveler.name} 
                       onChange={(e) => handleTravelerChange(index, 'name', e.target.value)}
                       className="col-span-2"
                     />
                     <Input 
                       type="number" 
-                      placeholder="Age"
+                      placeholder={t('age')}
                       value={traveler.age}
                       onChange={(e) => handleTravelerChange(index, 'age', parseInt(e.target.value) || undefined)}
                     />
@@ -289,12 +291,12 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                         onValueChange={(value: 'male' | 'female' | 'other') => handleTravelerChange(index, 'gender', value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Gender" />
+                          <SelectValue placeholder={t('gender')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="male">{t('male')}</SelectItem>
+                          <SelectItem value="female">{t('female')}</SelectItem>
+                          <SelectItem value="other">{t('other')}</SelectItem>
                         </SelectContent>
                       </Select>
                       {travelers.length > 1 && (
@@ -307,7 +309,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 ))}
                 <Button variant="outline" onClick={addTraveler}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Traveler
+                  {t('add_traveler')}
                 </Button>
               </div>
             </DialogContent>
@@ -318,7 +320,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
       {/* Popular Destinations */}
       {!selectedCityValue && (
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-center">Popular Destinations in India</h3>
+          <h3 className="text-xl font-semibold text-center">{t('popular_destinations_in_india')}</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {popularDestinations.map((destination) => (
               <Card 
@@ -337,8 +339,8 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                     {destination.description}
                   </p>
                    <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-muted-foreground">From</span>
-                    <span className="font-semibold text-primary">₹{(destination.averageCost * 83).toLocaleString()}/day</span>
+                    <span className="text-xs text-muted-foreground">{t('from')}</span>
+                    <span className="font-semibold text-primary">₹{(destination.averageCost * 83).toLocaleString()}{t('per_day')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -353,7 +355,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-              <CardTitle>Gathering destination insights...</CardTitle>
+              <CardTitle>{t('gathering_destination_insights')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -382,7 +384,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 <div>
                   <h4 className="font-semibold flex items-center gap-2 mb-2">
                     <Coffee className="w-4 h-4 text-primary" />
-                    Food Specialties
+                    {t('food_specialties')}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedDestination.foodSpecialties.map((food) => (
@@ -394,7 +396,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 <div>
                   <h4 className="font-semibold flex items-center gap-2 mb-2">
                     <Camera className="w-4 h-4 text-primary" />
-                    Famous Landmarks
+                    {t('famous_landmarks')}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedDestination.landmarks.map((landmark) => (
@@ -408,7 +410,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 <div>
                   <h4 className="font-semibold flex items-center gap-2 mb-2">
                     <Globe className="w-4 h-4 text-primary" />
-                    Cultural Highlights
+                    {t('cultural_highlights')}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedDestination.culturalHighlights.map((culture) => (
@@ -420,7 +422,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 <div>
                   <h4 className="font-semibold flex items-center gap-2 mb-2">
                     <Mountain className="w-4 h-4 text-primary" />
-                    Popular Activities
+                    {t('popular_activities')}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedDestination.activities.map((activity) => (
@@ -443,7 +445,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
           size="lg"
           className="px-8"
         >
-          Continue to Budget & Duration
+          {t('continue_to_budget_and_duration')}
         </Button>
       </div>
 

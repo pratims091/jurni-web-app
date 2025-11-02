@@ -13,14 +13,12 @@ const languages = [
   { value: "hi", label: "Hindi" },
   { value: "ta", label: "Tamil" },
   { value: "bn", label: "Bengali" },
-  { value: "te", label: "Telugu" },
   { value: "mr", label: "Marathi" },
   { value: "gu", label: "Gujarati" },
   { value: "kn", label: "Kannada" },
   { value: "ml", label: "Malayalam" },
   { value: "pa", label: "Punjabi" },
   { value: "as", label: "Assamese" },
-  { value: "ur", label: "Urdu" },
 ];
 
 export const LanguageSwitcher = () => {

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -106,8 +107,9 @@ export const FinalItinerary = ({
   showBudget = true,
   showActions = true,
 }: FinalItineraryProps) => {
+  const { t } = useTranslation();
     
-  const destination = locationInfo?.destination || 'your destination';
+  const destination = locationInfo?.destination || t('your_destination');
   const travelers = locationInfo?.travelers || [];
   const budget = budgetDurationData?.budget || 0;
   const startDate = budgetDurationData?.startDate;
@@ -140,14 +142,14 @@ export const FinalItinerary = ({
     if (navigator.share) {
       navigator
         .share({
-          title: `My Trip to ${destination}`,
-          text: `Check out my travel itinerary for ${destination}!`,
+          title: t('my_trip_to', { destination }),
+          text: t('check_out_itinerary', { destination }),
           url: window.location.href,
         })
-        .then(() => console.log('Successful share'))
-        .catch((error) => console.log('Error sharing', error));
+        .then(() => console.log(t('successful_share')))
+        .catch((error) => console.log(t('error_sharing'), error));
     } else {
-      alert('Sharing is not supported on this browser.');
+      alert(t('sharing_not_supported'));
     }
   };
 
@@ -155,8 +157,8 @@ export const FinalItinerary = ({
     <div id="itinerary-content" className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">Final Itinerary</h1>
-        <p className="text-xl text-muted-foreground">Your complete travel plan for {destination}</p>
+        <h1 className="text-4xl font-bold">{t('final_itinerary')}</h1>
+        <p className="text-xl text-muted-foreground">{t('complete_travel_plan', { destination })}</p>
       </div>
 
       {/* Trip Overview */}
@@ -164,7 +166,7 @@ export const FinalItinerary = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-primary">
             <MapPin className="w-6 h-6" />
-            Trip Overview
+            {t('trip_overview')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -172,7 +174,7 @@ export const FinalItinerary = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
-                Destination
+                {t('destination')}
               </div>
               <div className="font-semibold">{destination}</div>
             </div>
@@ -180,9 +182,9 @@ export const FinalItinerary = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4" />
-                Duration
+                {t('duration')}
               </div>
-              <div className="font-semibold">{duration} days</div>
+              <div className="font-semibold">{duration} {t('days')}</div>
               {startDate && endDate && (
                 <div className="text-sm text-muted-foreground">
                   {format(startDate, 'MMM dd')} - {format(endDate, 'MMM dd, yyyy')}
@@ -193,16 +195,16 @@ export const FinalItinerary = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="w-4 h-4" />
-                Travelers
+                {t('travelers')}
               </div>
-              <div className="font-semibold">{travelers.length} people</div>
+              <div className="font-semibold">{travelers.length} {t('people')}</div>
             </div>
 
             {showBudget && (
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <IndianRupee className="w-4 h-4" />
-                  Budget Status
+                  {t('budget_status')}
                 </div>
                 <div className="font-semibold">
                   <div className="flex items-center gap-2">
@@ -210,12 +212,12 @@ export const FinalItinerary = ({
                     {isOverBudget ? (
                       <Badge variant="destructive" className="text-xs">
                         <AlertTriangle className="w-3 h-3 mr-1" />
-                        Over Budget
+                        {t('over_budget')}
                       </Badge>
                     ) : (
                       <Badge variant="default" className="text-xs bg-green-500 text-white">
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Within Budget
+                        {t('within_budget')}
                       </Badge>
                     )}
                   </div>
@@ -232,45 +234,45 @@ export const FinalItinerary = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <IndianRupee className="w-5 h-5" />
-              Budget Breakdown
+              {t('budget_breakdown')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span>Total Budget:</span>
+                <span>{t('total_budget')}</span>
                 <span className="font-semibold">₹{budget.toLocaleString()}</span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
-                <span>Activities ({dayPlans.reduce((sum, day) => sum + day.activities.length, 0)} total):</span>
+                <span>{t('activities')} ({dayPlans.reduce((sum, day) => sum + day.activities.length, 0)} {t('total')}):</span>
                 <span>₹{activitiesTotalCost.toLocaleString()}</span>
               </div>
 
               {selectedHotel && (
                 <div className="flex justify-between items-center">
-                  <span>Hotel ({duration - 1} nights):</span>
+                  <span>{t('hotel')} ({duration - 1} {t('nights')}):</span>
                   <span>₹{hotelCost.toLocaleString()}</span>
                 </div>
               )}
 
               {selectedFlight && (
                 <div className="flex justify-between items-center">
-                  <span>Flight:</span>
+                  <span>{t('flight')}</span>
                   <span>₹{flightCost.toLocaleString()}</span>
                 </div>
               )}
 
               <Separator />
               <div className="flex justify-between items-center text-lg font-bold">
-                <span>Total Cost:</span>
+                <span>{t('total_cost')}</span>
                 <span className={isOverBudget ? 'text-destructive' : 'text-green-500'}>
                   ₹{finalCost.toLocaleString()}
                 </span>
               </div>
 
               <div className="flex justify-between items-center text-sm">
-                <span>Remaining Budget:</span>
+                <span>{t('remaining_budget')}</span>
                 <span className={isOverBudget ? 'text-destructive font-medium' : 'text-muted-foreground'}>
                   {isOverBudget
                     ? `-₹${Math.abs(budget - finalCost).toLocaleString()}`
@@ -288,7 +290,7 @@ export const FinalItinerary = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              Day-by-Day Itinerary
+              {t('day_by_day_itinerary')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -300,7 +302,7 @@ export const FinalItinerary = ({
                       <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
                         {dayPlan.day}
                       </div>
-                      Day {dayPlan.day}
+                      {t('day')} {dayPlan.day}
                       {startDate && (
                         <span className="text-sm text-muted-foreground font-normal">
                           ({format(new Date(startDate.getTime() + (dayPlan.day - 1) * 24 * 60 * 60 * 1000), 'EEE, MMM dd')})
@@ -318,7 +320,7 @@ export const FinalItinerary = ({
 
                   {dayPlan.activities.length === 0 ? (
                     <div className="text-center py-4 text-muted-foreground bg-muted/20 rounded-lg">
-                      <p className="text-sm">Free day - No activities planned</p>
+                      <p className="text-sm">{t('free_day')}</p>
                     </div>
                   ) : (
                     <div className="grid md:grid-cols-2 gap-3 pl-10">
@@ -360,7 +362,7 @@ export const FinalItinerary = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Hotel className="w-5 h-5" />
-                Accommodation
+                {t('accommodation')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -373,10 +375,10 @@ export const FinalItinerary = ({
                       <span key={i} className="text-yellow-400">★</span>
                     ))}
                   </div>
-                  <span className="text-sm text-muted-foreground">({selectedHotel.rating} stars)</span>
+                  <span className="text-sm text-muted-foreground">({selectedHotel.rating} {t('stars')})</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm">Total ({duration - 1} nights):</span>
+                  <span className="text-sm">{t('total_nights', { count: duration - 1 })}:</span>
                   <span className="font-semibold">₹{hotelCost.toLocaleString()}</span>
                 </div>
               </div>
@@ -389,7 +391,7 @@ export const FinalItinerary = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Plane className="w-5 h-5" />
-                Flight
+                {t('flight_title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -397,16 +399,16 @@ export const FinalItinerary = ({
                 <h4 className="font-semibold">{selectedFlight.airline}</h4>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Departure:</span>
+                    <span className="text-muted-foreground">{t('departure')}</span>
                     <span>{`${selectedFlight.departure} (${selectedFlight.departureAirport})`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Arrival:</span>
+                    <span className="text-muted-foreground">{t('arrival')}</span>
                     <span>{`${selectedFlight.arrival} (${selectedFlight.arrivalAirport})`}</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm">Flight Cost:</span>
+                  <span className="text-sm">{t('flight_cost')}</span>
                   <span className="font-semibold">₹{flightCost.toLocaleString()}</span>
                 </div>
               </div>
@@ -421,7 +423,7 @@ export const FinalItinerary = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Trip Members ({travelers.length})
+              {t('trip_members')} ({travelers.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -432,10 +434,10 @@ export const FinalItinerary = ({
                     {member.name ? member.name.charAt(0).toUpperCase() : 'T'}
                   </div>
                   <div>
-                    <div className="font-medium text-sm">{member.name || `Traveler ${index + 1}`}</div>
+                    <div className="font-medium text-sm">{member.name || `${t('traveler')} ${index + 1}`}</div>
                     <div className="text-xs text-muted-foreground">{member.email}</div>
                     {member.email === userEmail && (
-                      <Badge variant="secondary" className="text-xs mt-1">Trip Organizer</Badge>
+                      <Badge variant="secondary" className="text-xs mt-1">{t('trip_organizer')}</Badge>
                     )}
                   </div>
                 </div>
@@ -451,21 +453,21 @@ export const FinalItinerary = ({
           <div className="flex gap-3">
             <Button variant="outline" size="sm" onClick={handleDownloadPdf}>
               <Download className="w-4 h-4 mr-2" />
-              Download PDF
+              {t('download_pdf')}
             </Button>
             <Button variant="outline" size="sm" onClick={handleShare}>
               <Share className="w-4 h-4 mr-2" />
-              Share Itinerary
+              {t('share_itinerary')}
             </Button>
           </div>
 
           <div className="flex gap-3">
             <Button onClick={onStartOver} variant="outline">
-              Start Over
+              {t('start_over')}
             </Button>
             <Button onClick={onConfirm} variant="travel" size="lg">
               <CheckCircle className="w-4 h-4 mr-2" />
-              Save Trip
+              {t('save_trip')}
             </Button>
           </div>
         </div>
