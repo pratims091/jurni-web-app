@@ -22,7 +22,7 @@ export const Footer = ({ onNavigate }: FooterProps) => {
               <div className="p-2 rounded-lg bg-primary/10">
                 <Plane className="w-6 h-6 text-primary" />
               </div>
-              <span className="text-xl font-bold">TravelPlan</span>
+              <span className="text-xl font-bold">Jurni</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
               {t('footer_description')}
@@ -133,7 +133,7 @@ export const Footer = ({ onNavigate }: FooterProps) => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-muted-foreground text-sm">
-            © {currentYear} TravelPlan. {t('all_rights_reserved')}
+            © {currentYear} Jurni. {t('all_rights_reserved')}
           </p>
           <div className="flex space-x-6 text-sm text-muted-foreground">
             <button className="hover:text-primary transition-colors">{t('privacy_policy')}</button>

@@ -136,7 +136,7 @@ export const Navigation = ({ onNavigate }: NavigationProps) => {
             <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
               <Plane className="w-6 h-6 text-primary" />
             </div>
-            <span className="text-xl font-bold">TravelPlan</span>
+            <span className="text-xl font-bold">Jurni</span>
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
