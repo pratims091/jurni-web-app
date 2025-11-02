@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,53 +59,50 @@ interface TripPlan {
 const defaultTripPlans: TripPlan[] = [
   {
     id: "1",
-    title: "Budget Explorer",
+    title: "budget_explorer",
     duration: 3,
     budget: 15000,
-    description:
-      "Perfect for budget-conscious travelers who want to experience the essentials",
+    description: "budget_explorer_description",
     rating: 4.2,
     includes: [
-      "Budget accommodation",
-      "Local transport",
-      "Breakfast included",
-      "2 guided tours",
+      "budget_accommodation",
+      "local_transport",
+      "breakfast_included",
+      "2_guided_tours",
     ],
-    accommodationType: "Budget hotels & hostels",
+    accommodationType: "budget_hotels_and_hostels",
   },
   {
     id: "2",
-    title: "Comfort Traveler",
+    title: "comfort_traveler",
     duration: 5,
     budget: 35000,
-    description:
-      "Balanced experience with comfort and comprehensive sightseeing",
+    description: "comfort_traveler_description",
     rating: 4.6,
     includes: [
-      "3-star accommodation",
-      "AC transport",
-      "All meals",
-      "4 guided tours",
-      "Entry tickets",
+      "3_star_accommodation",
+      "ac_transport",
+      "all_meals",
+      "4_guided_tours",
+      "entry_tickets",
     ],
-    accommodationType: "3-star hotels with amenities",
+    accommodationType: "3_star_hotels_with_amenities",
   },
   {
     id: "3",
-    title: "Luxury Escape",
+    title: "luxury_escape",
     duration: 7,
     budget: 75000,
-    description:
-      "Premium experience with luxury amenities and exclusive access",
+    description: "luxury_escape_description",
     rating: 4.9,
     includes: [
-      "5-star accommodation",
-      "Premium transport",
-      "All meals",
-      "Private guides",
-      "Exclusive experiences",
+      "5_star_accommodation",
+      "premium_transport",
+      "all_meals",
+      "private_guides",
+      "exclusive_experiences",
     ],
-    accommodationType: "5-star luxury resorts",
+    accommodationType: "5_star_luxury_resorts",
   },
 ];
 
@@ -123,6 +121,7 @@ export const BudgetDurationStep = ({
   departure,
   totalTravellers,
 }: BudgetDurationStepProps) => {
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<TripPlan | null>(
     initialData?.selectedPlan || null
   );
@@ -242,15 +241,15 @@ export const BudgetDurationStep = ({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Budget & Duration</h2>
+        <h2 className="text-3xl font-bold mb-2">{t('budget_and_duration')}</h2>
         <p className="text-muted-foreground">
-          Select a pre-designed plan for {destination} or customize your trip.
+          {t('select_plan_or_customize', { destination })}
         </p>
       </div>
 
       {/* Default Trip Suggestions */}
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold">AI-Curated Trip Plans</h3>
+        <h3 className="text-xl font-semibold">{t('ai_curated_trip_plans')}</h3>
         <div className="grid lg:grid-cols-3 gap-6">
           {defaultTripPlans.map((plan) => (
             <Card
@@ -262,7 +261,7 @@ export const BudgetDurationStep = ({
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{plan.title}</CardTitle>
+                  <CardTitle className="text-lg">{t(plan.title)}</CardTitle>
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm font-medium">{plan.rating}</span>
@@ -272,7 +271,7 @@ export const BudgetDurationStep = ({
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      {plan.duration} Days
+                      {plan.duration} {t('days')}
                     </div>
                     <div className="flex items-center gap-1">
                       <IndianRupee className="w-4 h-4" />
@@ -280,22 +279,22 @@ export const BudgetDurationStep = ({
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {plan.description}
+                    {t(plan.description)}
                   </p>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">What's Included:</h4>
+                  <h4 className="font-medium mb-2">{t('whats_included')}</h4>
                   <div className="flex flex-wrap gap-1">
                     {plan.includes.slice(0, 3).map((item) => (
                       <Badge key={item} variant="secondary" className="text-xs">
-                        {item}
+                        {t(item)}
                       </Badge>
                     ))}
                     {plan.includes.length > 3 && (
                       <Badge variant="outline" className="text-xs">
-                        +{plan.includes.length - 3} more
+                        +{plan.includes.length - 3} {t('more')}
                       </Badge>
                     )}
                   </div>
@@ -306,7 +305,7 @@ export const BudgetDurationStep = ({
                     variant="default"
                     className="w-full justify-center mt-2 bg-green-500 text-white"
                   >
-                    Selected
+                    {t('selected')}
                   </Badge>
                 )}
               </CardContent>
@@ -320,12 +319,12 @@ export const BudgetDurationStep = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            Or Customize Your Trip
+            {t('or_customize_your_trip')}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="budget">Your Budget</Label>
+            <Label htmlFor="budget">{t('your_budget')}</Label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -336,7 +335,7 @@ export const BudgetDurationStep = ({
                 <Input
                   id="budget"
                   type="number"
-                  placeholder="e.g., 25000"
+                  placeholder={t('example_budget')}
                   value={customBudget}
                   onChange={handleCustomBudgetChange}
                   className="pl-8"
@@ -344,7 +343,7 @@ export const BudgetDurationStep = ({
               </div>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Currency" />
+                  <SelectValue placeholder={t('currency')} />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.keys(CURRENCY_SYMBOLS).map((code) => (
@@ -358,8 +357,8 @@ export const BudgetDurationStep = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="duration">
-              Trip Dates (
-              {tripDuration > 0 ? `${tripDuration} Days` : "Select dates"})
+              {t('trip_dates')} (
+              {tripDuration > 0 ? `${tripDuration} ${t('days')}` : t('select_dates')})
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -382,7 +381,7 @@ export const BudgetDurationStep = ({
                       format(date.from, "MMM d, yyyy")
                     )
                   ) : (
-                    <span>Pick your dates</span>
+                    <span>{t('pick_your_dates')}</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -407,7 +406,7 @@ export const BudgetDurationStep = ({
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-              <CardTitle>Updating your preferences...</CardTitle>
+              <CardTitle>{t('updating_your_preferences')}</CardTitle>
             </div>
           </CardHeader>
         </Card>
@@ -416,7 +415,7 @@ export const BudgetDurationStep = ({
       {/* Navigation */}
       <div className="flex justify-between max-w-4xl mx-auto">
         <Button onClick={onBack} variant="outline">
-          ← Back to Location
+          {t('back_to_location')}
         </Button>
         <Button
           onClick={handleNext}
@@ -424,7 +423,7 @@ export const BudgetDurationStep = ({
           variant="travel"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Continue to Activities →
+          {t('continue_to_activities')}
         </Button>
       </div>
     </div>

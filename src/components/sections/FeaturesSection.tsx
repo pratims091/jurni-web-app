@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Calendar, DollarSign, Hotel, Plane, Shield, Clock, Heart } from 'lucide-react';
+import { MapPin, Calendar, BadgeIndianRupee, Hotel, Plane, Shield, Clock, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export const FeaturesSection = () => {
@@ -19,7 +19,7 @@ export const FeaturesSection = () => {
       color: "text-accent"
     },
     {
-      icon: DollarSign,
+      icon: BadgeIndianRupee,
       title: t('budget_optimized_planning'),
       description: t('budget_optimized_planning_desc'),
       color: "text-success"

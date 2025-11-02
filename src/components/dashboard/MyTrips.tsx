@@ -10,9 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { FinalItinerary } from "../travel/FinalItinerary";
 import { toast } from "@/components/ui/use-toast";
+import { useTranslation } from "react-i18next";
 
 export const MyTrips = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState<any>(null);
@@ -25,8 +27,8 @@ export const MyTrips = () => {
     const fetchTrips = async () => {
       if (!authToken) {
         toast({
-          title: "Unauthorized",
-          description: "Please login to view your trips",
+          title: t("unauthorized"),
+          description: t("please_login_to_view_trips"),
           variant: "destructive",
         });
         setLoading(false);
@@ -44,7 +46,7 @@ export const MyTrips = () => {
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.message || "Failed to fetch trips");
+          throw new Error(errorData.message || t("failed_to_fetch_trips"));
         }
 
         const data = await res.json();
@@ -52,8 +54,8 @@ export const MyTrips = () => {
       } catch (err: any) {
         console.error("Error fetching trips:", err);
         toast({
-          title: "Error",
-          description: err.message || "Could not load trips",
+          title: t("error"),
+          description: err.message || t("could_not_load_trips"),
           variant: "destructive",
         });
       } finally {
@@ -62,7 +64,7 @@ export const MyTrips = () => {
     };
 
     fetchTrips();
-  }, [authToken]);
+  }, [authToken, t]);
 
   // Fetch user profile to get email
   useEffect(() => {
@@ -118,14 +120,14 @@ export const MyTrips = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">My Trips</h2>
-        <Button onClick={handleCreateNewTrip}>Create New Trip</Button>
+        <h2 className="text-2xl font-bold">{t("my_trips")}</h2>
+        <Button onClick={handleCreateNewTrip}>{t("create_new_trip")}</Button>
       </div>
 
       {loading ? (
-        <p>Loading trips...</p>
+        <p>{t("loading_trips")}</p>
       ) : trips.length === 0 ? (
-        <p>No trips found. Create one!</p>
+        <p>{t("no_trips_found")}</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {trips.map((trip: any) => (
@@ -136,17 +138,17 @@ export const MyTrips = () => {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">
-                    Duration: {trip.duration} days
+                    {t("duration_days", { duration: trip.duration })}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Budget: {trip.totalBudget}
+                    {t("budget", { budget: trip.totalBudget })}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   onClick={() => handleViewDetails(trip)}
                 >
-                  View Details
+                  {t("view_details")}
                 </Button>
               </CardContent>
             </Card>
