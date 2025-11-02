@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,6 +86,7 @@ export const ActivitiesSelectionStep = ({
   activities, // Using activities from props
   isFlexibleBudget = false 
 }: ActivitiesSelectionStepProps) => {
+  const { t } = useTranslation();
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -124,12 +126,12 @@ export const ActivitiesSelectionStep = ({
         <div className="space-y-6 max-w-6xl mx-auto text-center">
             <Card>
                 <CardHeader>
-                    <CardTitle>No Activities Found</CardTitle>
+                    <CardTitle>{t('no_activities_found')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p>We couldn't find any activities for the selected criteria. Please try different options.</p>
+                    <p>{t('no_activities_found_description')}</p>
                     <Button onClick={onBack} variant="outline" className="mt-4">
-                      ← Back to Budget & Duration
+                      {t('back_to_budget_and_duration')}
                     </Button>
                 </CardContent>
             </Card>
@@ -140,9 +142,9 @@ export const ActivitiesSelectionStep = ({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Choose Your Experiences</h2>
+        <h2 className="text-3xl font-bold mb-2">{t('choose_your_experiences')}</h2>
         <p className="text-muted-foreground">
-          Select activities for your {duration}-day trip to {destination}
+          {t('select_activities_for_trip', { duration, destination })}
         </p>
       </div>
 
@@ -164,7 +166,7 @@ export const ActivitiesSelectionStep = ({
               className="flex items-center gap-2"
             >
               <CategoryIcon className="w-4 h-4" />
-              {category.charAt(0).toUpperCase() + category.slice(1)}
+              {t(category)}
             </Button>
           );
         })}
@@ -175,7 +177,7 @@ export const ActivitiesSelectionStep = ({
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-              <CardTitle>AI is updating your itinerary...</CardTitle>
+              <CardTitle>{t('ai_updating_itinerary')}</CardTitle>
             </div>
           </CardHeader>
         </Card>
@@ -209,7 +211,7 @@ export const ActivitiesSelectionStep = ({
                                 variant="outline" 
                                 className={`w-fit ${categoryColors[mappedCategory]}`}>
                                 <CategoryIcon className="w-3 h-3 mr-1" />
-                                {mappedCategory}
+                                {t(mappedCategory)}
                             </Badge>
                         </div>
                     </div>
@@ -238,7 +240,7 @@ export const ActivitiesSelectionStep = ({
                       {activity.cost.toLocaleString()}
                     </div>
                     {activity.popularity === 'high' && (
-                      <Badge variant="destructive" className="text-xs">Popular</Badge>
+                      <Badge variant="destructive" className="text-xs">{t('popular')}</Badge>
                     )}
                   </div>
                 </div>
@@ -251,7 +253,7 @@ export const ActivitiesSelectionStep = ({
       {selectedActivities.length > 0 && (
         <Card className="max-w-4xl mx-auto">
           <CardHeader>
-            <CardTitle>Selected Activities ({selectedActivities.length})</CardTitle>
+            <CardTitle>{t('selected_activities')} ({selectedActivities.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -262,7 +264,7 @@ export const ActivitiesSelectionStep = ({
                 </div>
               ))}
               <div className="flex items-center justify-between pt-2 font-semibold text-lg">
-                <span>Total Activities Cost:</span>
+                <span>{t('total_activities_cost')}</span>
                 <span>₹{totalCost.toLocaleString()}</span>
               </div>
             </div>
@@ -272,14 +274,14 @@ export const ActivitiesSelectionStep = ({
 
       <div className="flex justify-between max-w-4xl mx-auto">
         <Button onClick={onBack} variant="outline">
-          ← Back to Budget
+          {t('back_to_budget')}
         </Button>
         <Button 
           onClick={handleNext}
           variant="travel"
           disabled={selectedActivities.length === 0}
         >
-          Continue to Day-wise Plan →
+          {t('continue_to_day_wise_plan')}
         </Button>
       </div>
     </div>

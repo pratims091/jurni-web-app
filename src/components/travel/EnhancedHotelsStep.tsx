@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 
+// ... (interface definitions remain the same) ...
 interface Hotel {
   id: string;
   name: string;
@@ -67,6 +69,7 @@ interface HotelsStepProps {
   isFlexibleBudget?: boolean;
 }
 
+
 const amenityIcons: { [key: string]: any } = {
   WiFi: Wifi,
   "Swimming Pool": Waves,
@@ -106,6 +109,7 @@ export const EnhancedHotelsStep = ({
   endDate,
   isFlexibleBudget = false,
 }: HotelsStepProps) => {
+  const { t } = useTranslation();
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(
     initialData?.selectedHotel || null
   );
@@ -191,8 +195,8 @@ export const EnhancedHotelsStep = ({
     } catch (error) {
       console.error("Error fetching flights:", error);
       toast({
-        title: "Error",
-        description: "Could not fetch flight suggestions. Please try again.",
+        title: t('error'),
+        description: t('error_fetching_flights'),
       });
     } finally {
       setIsFetchingFlights(false);
@@ -213,10 +217,9 @@ export const EnhancedHotelsStep = ({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Choose Your Perfect Stay</h2>
+        <h2 className="text-3xl font-bold mb-2">{t('choose_your_perfect_stay')}</h2>
         <p className="text-muted-foreground">
-          Find the ideal accommodation for your {duration}-day trip to{" "}
-          {destination}
+          {t('find_ideal_accommodation', { duration, destination })}
         </p>
       </div>
 
@@ -224,19 +227,19 @@ export const EnhancedHotelsStep = ({
         <CardContent className="pt-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-sm text-muted-foreground">Destination</p>
+              <p className="text-sm text-muted-foreground">{t('destination')}</p>
               <p className="font-semibold">{destination}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Duration</p>
-              <p className="font-semibold">{duration} nights</p>
+              <p className="text-sm text-muted-foreground">{t('duration')}</p>
+              <p className="font-semibold">{duration} {t('nights')}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Travelers</p>
-              <p className="font-semibold">{travelers} people</p>
+              <p className="text-sm text-muted-foreground">{t('travelers')}</p>
+              <p className="font-semibold">{travelers} {t('people')}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Budget</p>
+              <p className="text-sm text-muted-foreground">{t('budget')}</p>
               <p className="font-semibold">₹{budget.toLocaleString()}</p>
             </div>
           </div>
@@ -257,7 +260,7 @@ export const EnhancedHotelsStep = ({
             size="sm"
             onClick={() => setFilterCategory(category)}
           >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
+            {t(`${category.toLowerCase()}_category`, { defaultValue: category.charAt(0).toUpperCase() + category.slice(1) })}
           </Button>
         ))}
       </div>
@@ -267,7 +270,7 @@ export const EnhancedHotelsStep = ({
           <CardHeader>
             <div className="flex items-center gap-2">
               <Loader2 className="animate-spin w-5 h-5" />
-              <CardTitle>Finalizing your hotel choice...</CardTitle>
+              <CardTitle>{t('finalizing_hotel_choice')}</CardTitle>
             </div>
           </CardHeader>
         </Card>
@@ -290,7 +293,7 @@ export const EnhancedHotelsStep = ({
               <div className="relative h-48 bg-gradient-subtle rounded-t-lg flex items-center justify-center">
                 <Camera className="w-12 h-12 text-white" />
                 <Badge className={`absolute top-3 left-3 ${categoryClass}`}>
-                  {hotel.category}
+                  {t(`${hotel.category.toLowerCase()}_category`, { defaultValue: hotel.category })}
                 </Badge>
               </div>
 
@@ -321,7 +324,7 @@ export const EnhancedHotelsStep = ({
 
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Amenities</h4>
+                  <h4 className="font-medium text-sm">{t('amenities')}</h4>
                   <div className="flex flex-wrap gap-1">
                     {hotel.amenities.slice(0, 4).map((amenity) => {
                       const IconComponent = amenityIcons[amenity] || Shield;
@@ -345,7 +348,7 @@ export const EnhancedHotelsStep = ({
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Highlights</h4>
+                  <h4 className="font-medium text-sm">{t('highlights')}</h4>
                   <div className="space-y-1">
                     {hotel.highlights.slice(0, 2).map((highlight) => (
                       <div
@@ -362,7 +365,7 @@ export const EnhancedHotelsStep = ({
                 <div className="space-y-1 pt-2 border-t">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
-                      Per night
+                      {t('per_night')}
                     </span>
                     <span className="font-semibold">
                       ₹{hotel.pricePerNight.toLocaleString()}
@@ -370,21 +373,21 @@ export const EnhancedHotelsStep = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      Total ({duration} nights)
+                      {t('total_duration_nights', { duration })}
                     </span>
                     <span className="text-lg font-bold text-primary">
                       ₹{hotel.totalPrice.toLocaleString()}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {hotel.reviews} reviews
+                    {hotel.reviews} {t('reviews')}
                   </p>
                 </div>
 
                 {selectedHotel?.id === hotel.id && (
                   <Badge className="w-full justify-center bg-green-500 text-white">
                     <CheckCircle className="w-4 h-4 mr-1" />
-                    Selected Hotel
+                    {t('selected_hotel')}
                   </Badge>
                 )}
               </CardContent>
@@ -398,27 +401,27 @@ export const EnhancedHotelsStep = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              Selected Hotel: {selectedHotel.name}
+              {t('selected_hotel_name', { hotelName: selectedHotel.name })}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Location</p>
+                <p className="text-sm text-muted-foreground">{t('location')}</p>
                 <p className="font-medium">{selectedHotel.location}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Rating</p>
+                <p className="text-sm text-muted-foreground">{t('rating')}</p>
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   <span className="font-medium">{selectedHotel.rating}/5</span>
                   <span className="text-sm text-muted-foreground">
-                    ({selectedHotel.reviews} reviews)
+                    ({selectedHotel.reviews} {t('reviews')})
                   </span>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Cost</p>
+                <p className="text-sm text-muted-foreground">{t('total_cost')}</p>
                 <p className="text-xl font-bold text-primary">
                   ₹{hotelCost.toLocaleString()}
                 </p>
@@ -430,7 +433,7 @@ export const EnhancedHotelsStep = ({
 
       <div className="flex justify-between max-w-4xl mx-auto">
         <Button onClick={onBack} variant="outline">
-          ← Back to Day Planner
+          {t('back_to_day_planner')}
         </Button>
         <Button
           onClick={handleNext}
@@ -440,7 +443,7 @@ export const EnhancedHotelsStep = ({
           {isFetchingFlights && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Continue to Flights →
+          {t('continue_to_flights')}
         </Button>
       </div>
     </div>

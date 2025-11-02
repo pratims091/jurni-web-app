@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, MapPin, Calendar, DollarSign, CheckCircle } from 'lucide-react';
+import { ArrowRight, MapPin, Calendar, BadgeIndianRupee, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export const HowItWorksSection = () => {
@@ -22,7 +22,7 @@ export const HowItWorksSection = () => {
     },
     {
       step: 3,
-      icon: DollarSign,
+      icon: BadgeIndianRupee,
       title: t('step3_title'),
       description: t('step3_desc'),
       details: [t('step3_detail1'), t('step3_detail2'), t('step3_detail3')]

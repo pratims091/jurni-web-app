@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { MyTrips } from '@/components/dashboard/MyTrips';
 import { Profile } from '@/components/dashboard/Profile';
 import { Bookings } from '@/components/dashboard/Bookings';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('my-trips');
 
   const renderContent = () => {
@@ -26,13 +28,13 @@ const Dashboard = () => {
           className={`px-4 py-2 text-sm font-medium ${activeTab === 'my-trips' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('my-trips')}
         >
-          My Trips
+          {t('my_trips')}
         </button>
         <button 
           className={`px-4 py-2 text-sm font-medium ${activeTab === 'profile' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('profile')}
         >
-          Profile
+          {t('profile')}
         </button>
         {/* <button 
           className={`px-4 py-2 text-sm font-medium ${activeTab === 'bookings' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
