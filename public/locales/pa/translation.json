@@ -116,7 +116,7 @@
   "loading_trips": "ਯਾਤਰਾਵਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ...",
   "no_trips_found": "ਕੋਈ ਯਾਤਰਾ ਨਹੀਂ ਮਿਲੀ। ਇੱਕ ਬਣਾਓ!",
   "duration_days": "ਮਿਆਦ: {{duration}} ਦਿਨ",
-  "budget": "ਬਜਟ: {{budget}}",
+  "budget": "ਬਜਟ",
   "view_details": "ਵੇਰਵੇ ਵੇਖੋ",
   "unauthorized": "ਅਣਅਧਿਕਾਰਤ",
   "please_login_to_view_trips": "ਆਪਣੀਆਂ ਯਾਤਰਾਵਾਂ ਦੇਖਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਲੌਗਇਨ ਕਰੋ",

@@ -116,7 +116,7 @@
   "loading_trips": "ভ্রমণ লোড হচ্ছে...",
   "no_trips_found": "কোন ভ্রমণ পাওয়া যায়নি। একটি তৈরি করুন!",
   "duration_days": "সময়কাল: {{duration}} দিন",
-  "budget": "বাজেট: {{budget}}",
+  "budget": "বাজেট",
   "view_details": "বিস্তারিত দেখুন",
   "unauthorized": "অননুমোদিত",
   "please_login_to_view_trips": "আপনার ভ্রমণ দেখতে লগইন করুন",

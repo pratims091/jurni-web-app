@@ -263,7 +263,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
             <DialogTrigger asChild>
               <Button variant="outline" className="w-full justify-start text-left font-normal">
                 <Users className="mr-2 h-4 w-4" />
-                {t('traveler', {count: travelers.length})}
+                {t('traveler', {count: travelers.length})} {travelers.length}
               </Button>
             </DialogTrigger>
             <DialogContent>

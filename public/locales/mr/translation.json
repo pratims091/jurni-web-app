@@ -116,7 +116,7 @@
   "loading_trips": "सहली लोड होत आहेत...",
   "no_trips_found": "कोणत्याही सहली आढळल्या नाहीत. एक तयार करा!",
   "duration_days": "कालावधी: {{duration}} दिवस",
-  "budget": "बजेट: {{budget}}",
+  "budget": "बजेट",
   "view_details": "तपशील पहा",
   "unauthorized": "अनधिकृत",
   "please_login_to_view_trips": "तुमच्या सहली पाहण्यासाठी कृपया लॉगिन करा",

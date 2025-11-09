@@ -116,7 +116,7 @@
   "loading_trips": "ভ্ৰমণ লোড হৈ আছে...",
   "no_trips_found": "কোনো ভ্ৰমণ পোৱা নগ'ল। এটা সৃষ্টি কৰক!",
   "duration_days": " সময়সীমা: {{duration}} দিন",
-  "budget": "বাজেট: {{budget}}",
+  "budget": "বাজেট",
   "view_details": "বিৱৰণ চাওক",
   "unauthorized": "অনधिकृत",
   "please_login_to_view_trips": "আপোনাৰ ভ্ৰমণসমূহ চাবলৈ অনুগ্ৰহ কৰি লগইন কৰক",

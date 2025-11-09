@@ -116,7 +116,7 @@
   "loading_trips": "യാത്രകൾ ലോഡ് ചെയ്യുന്നു...",
   "no_trips_found": "യാത്രകളൊന്നും കണ്ടെത്തിയില്ല. ഒന്ന് സൃഷ്ടിക്കൂ!",
   "duration_days": "ദൈർഘ്യം: {{duration}} ദിവസം",
-  "budget": "ബജറ്റ്: {{budget}}",
+  "budget": "ബജറ്റ്",
   "view_details": "വിవరങ്ങൾ കാണുക",
   "unauthorized": "അനധികൃതം",
   "please_login_to_view_trips": "നിങ്ങളുടെ യാത്രകൾ കാണാൻ ദയവായി ലോഗിൻ ചെയ്യുക",
