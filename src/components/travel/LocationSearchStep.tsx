@@ -99,12 +99,12 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
   const [selectedCityValue, setSelectedCityValue] = useState(initialData?.destination || '');
   const [departureCity, setDepartureCity] = useState(initialData?.departureCity || 'Jaipur');
   const [travelers, setTravelers] = useState<Traveler[]>(initialData?.travelers || []);
+  const [errors, setErrors] = useState<({[key: string]: string})[]>(initialData?.travelers?.map(() => ({})) || []);
   const [selectedDestination, setSelectedDestination] = useState<City | null>(initialData?.selectedCity || null);
   const [showDestinationDetails, setShowDestinationDetails] = useState(!!initialData?.selectedCity);
   const [isLoading, setIsLoading] = useState(false);
   const [cityOptions, setCityOptions] = useState<ComboboxOption[]>([]);
   const [isCityLoading, setIsCityLoading] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const fetchCities = async (namePrefix: string) => {
     setIsCityLoading(true);
@@ -204,34 +204,51 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
     const newTravelers = [...travelers];
     (newTravelers[index] as any)[field] = value;
     setTravelers(newTravelers);
+
+    const newErrors = [...errors];
+    const travelerErrors = validateTraveler(newTravelers[index]);
+    newErrors[index] = travelerErrors;
+    setErrors(newErrors);
   };
 
   const validateTraveler = (traveler: Traveler) => {
     const newErrors: { [key: string]: string } = {};
-    if (!traveler.name) newErrors.name = "Name is required";
+    const nameRegex = /^[a-zA-Z\s]*$/;
+    if (!traveler.name) {
+      newErrors.name = "Name is required";
+    } else if (!nameRegex.test(traveler.name)) {
+      newErrors.name = "Name can only contain letters and spaces";
+    }
     if (!traveler.age || traveler.age <= 0) newErrors.age = "A valid age is required";
     if (!traveler.gender) newErrors.gender = "Gender is required";
     return newErrors;
   };
 
   const addTraveler = () => {
-    const lastTraveler = travelers[travelers.length - 1];
     if (travelers.length > 0) {
-        const newErrors = validateTraveler(lastTraveler);
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
+      const lastTravelerIndex = travelers.length - 1;
+      const lastTraveler = travelers[lastTravelerIndex];
+      const newErrors = validateTraveler(lastTraveler);
+      
+      const updatedErrors = [...errors];
+      updatedErrors[lastTravelerIndex] = newErrors;
+      setErrors(updatedErrors);
+
+      if (Object.keys(newErrors).length === 0) {
+          setTravelers([...travelers, { name: '', gender: 'male' }]);
+          setErrors([...errors, {}]);
+      }
+    } else {
+      setTravelers([...travelers, { name: '', gender: 'male' }]);
+      setErrors([...errors, {}]);
     }
-    setErrors({});
-    setTravelers([...travelers, { name: '', gender: 'male' }]);
   };
 
   const removeTraveler = (index: number) => {
-    if (travelers.length > 1) {
       const newTravelers = travelers.filter((_, i) => i !== index);
+      const newErrors = errors.filter((_, i) => i !== index);
       setTravelers(newTravelers);
-    }
+      setErrors(newErrors);
   };
 
   return (
@@ -292,18 +309,23 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                 {travelers.map((traveler, index) => (
                   <div key={index}>
                     <div className="grid grid-cols-4 gap-2 items-center">
-                      <Input 
-                        placeholder={t('name')}
-                        value={traveler.name} 
-                        onChange={(e) => handleTravelerChange(index, 'name', e.target.value)}
-                        className="col-span-2"
-                      />
-                      <Input 
-                        type="number" 
-                        placeholder={t('age')}
-                        value={traveler.age}
-                        onChange={(e) => handleTravelerChange(index, 'age', parseInt(e.target.value) || undefined)}
-                      />
+                      <div className="col-span-2">
+                        <Input 
+                          placeholder={t('name')}
+                          value={traveler.name} 
+                          onChange={(e) => handleTravelerChange(index, 'name', e.target.value)}
+                        />
+                        {errors[index]?.name && <p className='text-red-500 text-xs mt-1'>{errors[index].name}</p>}
+                      </div>
+                      <div>
+                        <Input 
+                          type="number" 
+                          placeholder={t('age')}
+                          value={traveler.age}
+                          onChange={(e) => handleTravelerChange(index, 'age', parseInt(e.target.value) || undefined)}
+                        />
+                        {errors[index]?.age && <p className='text-red-500 text-xs mt-1'>{errors[index].age}</p>}
+                      </div>
                       <div className="flex items-center">
                         <Select 
                           value={traveler.gender} 
@@ -318,19 +340,15 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
                             <SelectItem value="other">{t('other')}</SelectItem>
                           </SelectContent>
                         </Select>
-                        {travelers.length > 1 && (
-                          <Button variant="ghost" size="icon" onClick={() => removeTraveler(index)} className="ml-1">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button variant="ghost" size="icon" onClick={() => removeTraveler(index)} className="ml-1">
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    {errors.name && <p className='text-red-500 text-xs mt-1'>{errors.name}</p>}
-                    {errors.age && <p className='text-red-500 text-xs mt-1'>{errors.age}</p>}
-                    {errors.gender && <p className='text-red-500 text-xs mt-1'>{errors.gender}</p>}
+                    {errors[index]?.gender && <p className='text-red-500 text-xs mt-1'>{errors[index].gender}</p>}
                   </div>
                 ))}
-                 {travelers.length === 0 && (
+                {travelers.length === 0 && (
                     <div className="text-center text-muted-foreground">
                         <p>Add at least one traveler to continue.</p>
                     </div>
@@ -468,7 +486,7 @@ export const LocationSearchStep = ({ onNext, initialData }: LocationSearchStepPr
       <div className="flex justify-center">
         <Button 
           onClick={handleNext} 
-          disabled={!selectedCityValue || !departureCity || !selectedDestination || travelers.length === 0}
+          disabled={!selectedCityValue || !departureCity || !selectedDestination || travelers.length === 0 || errors.some(err => Object.keys(err).length > 0) }
           variant="travel" 
           size="lg"
           className="px-8"
