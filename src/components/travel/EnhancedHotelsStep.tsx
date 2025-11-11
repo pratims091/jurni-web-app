@@ -236,7 +236,7 @@ export const EnhancedHotelsStep = ({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('travelers')}</p>
-              <p className="font-semibold">{travelers} {t('people')}</p>
+              <p className="font-semibold">{travelers} {t(travelers > 1 ? 'people' : 'person')}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('budget')}</p>

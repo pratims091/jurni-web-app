@@ -116,7 +116,7 @@
   "loading_trips": "યાત્રાઓ લોડ થઈ રહી છે...",
   "no_trips_found": "કોઈ યાત્રા મળી નથી. એક બનાવો!",
   "duration_days": "અવધિ: {{duration}} દિવસ",
-  "budget": "બજેટ: {{budget}}",
+  "budget": "બજેટ ",
   "view_details": "વિગતો જુઓ",
   "unauthorized": "અનધિકૃત",
   "please_login_to_view_trips": "તમારી યાત્રાઓ જોવા માટે કૃપા કરીને લોગિન કરો",

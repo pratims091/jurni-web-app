@@ -116,7 +116,7 @@
   "loading_trips": "Loading trips...",
   "no_trips_found": "No trips found. Create one!",
   "duration_days": "Duration: {{duration}} days",
-  "budget": "Budget: {{budget}}",
+  "budget": "Budget",
   "view_details": "View Details",
   "unauthorized": "Unauthorized",
   "please_login_to_view_trips": "Please login to view your trips",
